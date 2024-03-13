@@ -1,0 +1,32 @@
+package service
+
+import (
+	"filmhub/internal/model"
+	"filmhub/internal/repository"
+)
+
+type ActorService struct {
+	r repository.Actor
+}
+
+func NewActorService(r repository.Actor) *ActorService {
+	return &ActorService{
+		r: r,
+	}
+}
+
+func (s *ActorService) CreateActor(actor model.Actor) error {
+	return s.r.CreateActor(actor)
+}
+
+func (s *ActorService) GetAllActors() ([]model.ActorWithMovies, error) {
+	return s.r.GetAllActors()
+}
+
+func (s *ActorService) Delete(actorID int) error {
+	return s.r.Delete(actorID)
+}
+
+func (s *ActorService) Get(actorID int) (model.Actor, error) {
+	return s.r.Get(actorID)
+}
