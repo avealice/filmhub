@@ -10,8 +10,6 @@ import (
 
 func (h *Handler) actorHandle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case http.MethodPost:
-		h.createMovieForActor(w, r)
 	case http.MethodDelete:
 		h.deleteActor(w, r)
 	case http.MethodPut:
@@ -39,48 +37,6 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(actors)
 }
 
-func (h *Handler) createMovieForActor(w http.ResponseWriter, r *http.Request) {
-	role, err := getUserRole(r)
-	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "failed to get user role")
-		return
-	}
-
-	if role != "admin" {
-		newErrorResponse(w, http.StatusForbidden, "only admin can create movie")
-		return
-	}
-
-	path := strings.TrimSuffix(r.URL.Path, "/")
-	parts := strings.Split(path, "/")
-
-	if len(parts) != 4 || parts[3] != "movie" {
-		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
-	actorId, err := strconv.Atoi(parts[2])
-	if err != nil {
-		newErrorResponse(w, http.StatusMethodNotAllowed, "invalid actor id")
-		return
-	}
-
-	var input model.Movie
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		newErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	err = h.services.Movie.CreateMovieForActor(actorId, input)
-	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "failed to create movie")
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("mnovie created successfully"))
-}
-
 func (h *Handler) createActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -101,7 +57,7 @@ func (h *Handler) createActor(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Actor.CreateActor(input)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "failed to create actor")
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -146,7 +102,45 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
+	role, err := getUserRole(r)
+	if err != nil {
+		newErrorResponse(w, http.StatusInternalServerError, "failed to get user role")
+		return
+	}
 
+	if role != "admin" {
+		newErrorResponse(w, http.StatusForbidden, "only admin can update actors")
+		return
+	}
+
+	path := strings.TrimSuffix(r.URL.Path, "/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) != 3 || parts[1] != "actor" {
+		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	actodID, err := strconv.Atoi(parts[2])
+	if err != nil || actodID < 0 {
+		newErrorResponse(w, http.StatusBadRequest, "Invalid actor ID")
+		return
+	}
+
+	var input model.ActorWithMovies
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		newErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.services.Actor.Update(actodID, input)
+	if err != nil {
+		newErrorResponse(w, http.StatusInternalServerError, "Failed to update actor")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("actor updated successfully"))
 }
 
 func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +160,7 @@ func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 
 	actor, err := h.services.Actor.Get(actorID)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "Failed to get actor")
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

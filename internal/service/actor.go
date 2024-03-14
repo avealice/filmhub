@@ -27,6 +27,10 @@ func (s *ActorService) Delete(actorID int) error {
 	return s.r.Delete(actorID)
 }
 
-func (s *ActorService) Get(actorID int) (model.Actor, error) {
+func (s *ActorService) Get(actorID int) (model.ActorWithMovies, error) {
 	return s.r.Get(actorID)
+}
+
+func (s *ActorService) Update(actorID int, data model.ActorWithMovies) error {
+	return s.r.Update(actorID, data)
 }

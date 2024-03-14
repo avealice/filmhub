@@ -8,24 +8,25 @@ import (
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
 	GenerateToken(username, password string) (string, error)
-	ParseToken(token string) (int, string, error)
+	ParseToken(token string) (string, error)
 }
 
 type Movie interface {
-	GetAllMovies(sortBy, sortOrder string) ([]model.MovieWithActors, error)
-	CreateMovie(movie model.Movie) error
-	GetMovieByID(movieID int) (model.Movie, error)
+	GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error)
+	CreateMovie(movie model.MovieWithActors) error
+	GetMovieByID(movieID int) (model.MovieWithActors, error)
 	DeleteByID(movieID int) error
-	CreateMovieForActor(actorID int, movie model.Movie) error
-	UpdateMovie(movieID int, data model.Movie) error
-	// GetMovie(data model.Movie) (model.Movie, error)
+	UpdateMovie(movieID int, data model.MovieWithActors) error
+	GetMoviesByActor(actor string) ([]model.MovieWithActors, error)
+	GetMoviesByTitle(title string) ([]model.MovieWithActors, error)
 }
 
 type Actor interface {
 	CreateActor(actor model.Actor) error
 	GetAllActors() ([]model.ActorWithMovies, error)
 	Delete(actorID int) error
-	Get(actorID int) (model.Actor, error)
+	Get(actorID int) (model.ActorWithMovies, error)
+	Update(actorID int, data model.ActorWithMovies) error
 }
 
 type Service struct {

@@ -9,7 +9,6 @@ import (
 
 const (
 	authorizationHeader = "Authorization"
-	userCtx             = "userId"
 	userRoleCtx         = "role"
 )
 
@@ -34,30 +33,15 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 			return
 		}
 
-		userId, role, err := h.services.Authorization.ParseToken(headerParts[1])
+		role, err := h.services.Authorization.ParseToken(headerParts[1])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userCtx, userId)
-		ctx = context.WithValue(ctx, userRoleCtx, role)
+		ctx := context.WithValue(r.Context(), userRoleCtx, role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-func getUserId(r *http.Request) (int, error) {
-	id := r.Context().Value(userCtx)
-	if id == nil {
-		return -1, errors.New("user id not found")
-	}
-
-	idInt, ok := id.(int)
-	if !ok {
-		return -1, errors.New("user id is invalid type")
-	}
-
-	return idInt, nil
 }
 
 func getUserRole(r *http.Request) (string, error) {

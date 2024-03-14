@@ -26,6 +26,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	apiMux.Handle("/movies", h.userIdentity(http.HandlerFunc(h.getAllMovies)))
 	apiMux.Handle("/movie/", h.userIdentity(http.HandlerFunc(h.movieHandle)))
 	apiMux.Handle("/movie", h.userIdentity(http.HandlerFunc(h.createMovie)))
+	apiMux.Handle("/movie/search", h.userIdentity(http.HandlerFunc(h.searchMovie)))
 
 	apiMux.Handle("/actors", h.userIdentity(http.HandlerFunc(h.getAllActors)))
 	apiMux.Handle("/actor", h.userIdentity(http.HandlerFunc(h.createActor)))

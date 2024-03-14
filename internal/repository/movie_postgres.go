@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"filmhub/internal/model"
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -17,105 +20,111 @@ func NewMoviePostgres(db *sqlx.DB) *MoviePostgres {
 	}
 }
 
-func (r *MoviePostgres) GetAllMovies(sortBy, sortOrder string) ([]model.MovieWithActors, error) {
-	var movies []model.MovieWithActors
-	query := fmt.Sprintf(`
-	SELECT m.id AS movie_id, m.title AS movie_title, m.description AS movie_description, 
-		   TO_CHAR(m.release_date, 'YYYY-MM-DD') AS movie_release_date, m.rating AS movie_rating, 
-		   a.id AS actor_id, a.name AS actor_name, a.gender AS actor_gender, 
-		   TO_CHAR(a.birth_date, 'YYYY-MM-DD') AS actor_birth_date 
-	FROM %s m 
-	LEFT JOIN %s ma ON m.id = ma.movie_id 
-	LEFT JOIN %s a ON ma.actor_id = a.id 
-	ORDER BY %s %s
-`, moviesTable, movieActorTable, actorsTable, sortBy, sortOrder)
+func (r *MoviePostgres) GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error) {
+	var movies []model.Movie
+
+	query := fmt.Sprintf("SELECT id, title, description, release_date, rating FROM %s ORDER BY %s %s", moviesTable, sortBy, sortOrder)
+
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	movieMap := make(map[int]model.MovieWithActors)
-
 	for rows.Next() {
-		var movieID int
 		var movie model.Movie
-		var actor model.Actor
-		var releaseDateStr, actorBirthDateStr string
-		err := rows.Scan(&movieID, &movie.Title, &movie.Description, &releaseDateStr, &movie.Rating,
-			&actor.ID, &actor.Name, &actor.Gender, &actorBirthDateStr)
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.Rating)
 		if err != nil {
 			return nil, err
 		}
-
-		movieWithActors, ok := movieMap[movieID]
-		if !ok {
-			movie = model.Movie{ID: movieID, Title: movie.Title, Description: movie.Description, ReleaseDate: releaseDateStr, Rating: movie.Rating}
-			movieWithActors = model.MovieWithActors{Movie: movie, Actors: []model.Actor{}}
-			movieMap[movieID] = movieWithActors
-		}
-
-		actor.BirthDate = actorBirthDateStr
-		movieWithActors.Actors = append(movieWithActors.Actors, actor)
-		movieMap[movieID] = movieWithActors
+		movies = append(movies, movie)
 	}
 
-	for _, movieWithActors := range movieMap {
-		movies = append(movies, movieWithActors)
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return movies, nil
 }
 
-func (r *MoviePostgres) CreateMovie(movie model.Movie) error {
-	query := fmt.Sprintf("INSERT INTO %s (title, description, rating, release_date) VALUES ($1, $2, $3, $4)", moviesTable)
-	_, err := r.db.Exec(query, movie.Title, movie.Description, movie.Rating, movie.ReleaseDate)
-	if err != nil {
+func (r *MoviePostgres) CreateMovie(movie model.MovieWithActors) error {
+	var existingMovieID int
+	query := fmt.Sprintf("SELECT id FROM %s WHERE title = $1 AND description = $2 AND rating = $3 AND release_date = $4", moviesTable)
+	err := r.db.QueryRow(query, movie.Title, movie.Description, movie.Rating, movie.ReleaseDate).Scan(&existingMovieID)
+	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
 
-	return nil
-}
-
-func (r *MoviePostgres) CreateMovieForActor(actorID int, movie model.Movie) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return err
+	if err == nil {
+		return errors.New("movie with the same title, description, rating, and release date already exists")
 	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-		tx.Commit()
-	}()
 
-	query := fmt.Sprintf("INSERT INTO %s (title, description, release_date, rating) VALUES ($1, $2, $3, $4) RETURNING id", moviesTable)
-
-	row := tx.QueryRow(query, movie.Title, movie.Description, movie.ReleaseDate, movie.Rating)
+	movieQuery := fmt.Sprintf("INSERT INTO %s (title, description, rating, release_date) VALUES ($1, $2, $3, $4) RETURNING id", moviesTable)
 	var movieID int
-	err = row.Scan(&movieID)
+	err = r.db.QueryRow(movieQuery, movie.Title, movie.Description, movie.Rating, movie.ReleaseDate).Scan(&movieID)
 	if err != nil {
 		return err
 	}
 
-	query = fmt.Sprintf("INSERT INTO %s (movie_id, actor_id) VALUES ($1, $2)", movieActorTable)
-	_, err = tx.Exec(query, movieID, actorID)
-	if err != nil {
-		return err
+	for _, actor := range movie.Actors {
+		var actorID int
+		query := fmt.Sprintf("SELECT id FROM %s WHERE LOWER(name) = LOWER($1) AND LOWER(gender) = LOWER($2) AND birth_date = $3", actorsTable)
+		err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&actorID)
+		if err != nil && err != sql.ErrNoRows {
+			return err
+		}
+
+		if err == sql.ErrNoRows {
+			query := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3) RETURNING id", actorsTable)
+			err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&actorID)
+			if err != nil {
+				return err
+			}
+		}
+
+		query = fmt.Sprintf("INSERT INTO %s (movie_id, actor_id) VALUES ($1, $2)", movieActorTable)
+		_, err = r.db.Exec(query, movieID, actorID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (r *MoviePostgres) GetMovieByID(movieID int) (model.Movie, error) {
-	var movie model.Movie
+func (r *MoviePostgres) GetMovieByID(movieID int) (model.MovieWithActors, error) {
+	var movie model.MovieWithActors
 
-	query := fmt.Sprintf("SELECT id, title, description, TO_CHAR(release_date, 'YYYY-MM-DD') as release_date, rating FROM %s WHERE id = $1", moviesTable)
+	query := fmt.Sprintf(`
+		SELECT m.id, m.title, m.description, TO_CHAR(m.release_date, 'YYYY-MM-DD'), m.rating, a.id, a.name, a.gender, TO_CHAR(a.birth_date, 'YYYY-MM-DD')
+		FROM %s m
+		LEFT JOIN %s ma ON m.id = ma.movie_id
+		LEFT JOIN %s a ON ma.actor_id = a.id
+		WHERE m.id = $1
+	`, moviesTable, movieActorTable, actorsTable)
 
-	err := r.db.QueryRow(query, movieID).Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.Rating)
+	rows, err := r.db.Query(query, movieID)
 	if err != nil {
-		return model.Movie{}, err
+		return movie, err
+	}
+	defer rows.Close()
+
+	actorsMap := make(map[int]model.Actor)
+
+	for rows.Next() {
+		var actor model.Actor
+		var actorID int
+
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.Rating, &actorID, &actor.Name, &actor.Gender, &actor.BirthDate)
+		if err != nil {
+			continue
+		}
+
+		if _, ok := actorsMap[actorID]; !ok {
+			actorsMap[actorID] = actor
+		}
+
+		movie.Actors = append(movie.Actors, actorsMap[actorID])
 	}
 
 	return movie, nil
@@ -130,6 +139,160 @@ func (r *MoviePostgres) DeleteByID(movieID int) error {
 	return nil
 }
 
-func (r *MoviePostgres) UpdateMovie(movieID int, data model.Movie) error {
+func (r *MoviePostgres) UpdateMovie(movieID int, data model.MovieWithActors) error {
+	updateQuery := fmt.Sprintf("UPDATE %s SET ", moviesTable)
+	var params []interface{}
+
+	paramIndex := 1
+
+	if data.Title != "" {
+		updateQuery += fmt.Sprintf("title = $%d, ", paramIndex)
+		params = append(params, data.Title)
+		paramIndex++
+	}
+
+	if data.Description != "" {
+		updateQuery += fmt.Sprintf("description = $%d, ", paramIndex)
+		params = append(params, data.Description)
+		paramIndex++
+	}
+
+	if data.ReleaseDate != "" {
+		updateQuery += fmt.Sprintf("release_date = $%d, ", paramIndex)
+		params = append(params, data.ReleaseDate)
+		paramIndex++
+	}
+
+	if data.Rating != 0 {
+		updateQuery += fmt.Sprintf("rating = $%d, ", paramIndex)
+		params = append(params, data.Rating)
+		paramIndex++
+	}
+
+	updateQuery = strings.TrimSuffix(updateQuery, ", ") + fmt.Sprintf(" WHERE id = $%d", paramIndex)
+	params = append(params, movieID)
+
+	_, err := r.db.Exec(updateQuery, params...)
+	if err != nil {
+		return err
+	}
+
+	for _, actor := range data.Actors {
+		var actorID int
+		query := fmt.Sprintf("SELECT id FROM %s WHERE LOWER(name) = LOWER($1) AND LOWER(gender) = LOWER($2) AND birth_date = $3", actorsTable)
+		err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&actorID)
+		if err != nil && err != sql.ErrNoRows {
+			return err
+		}
+
+		if err == sql.ErrNoRows {
+			query := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3) RETURNING id", actorsTable)
+			err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&actorID)
+			if err != nil {
+				return err
+			}
+		}
+
+		query = fmt.Sprintf("INSERT INTO %s (movie_id, actor_id) VALUES ($1, $2)", movieActorTable)
+		_, err = r.db.Exec(query, movieID, actorID)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (r *MoviePostgres) GetMoviesByTitle(titleFragment string) ([]model.MovieWithActors, error) {
+	var moviesMap = make(map[int]model.MovieWithActors)
+	var movies []model.MovieWithActors
+
+	query := `
+            SELECT m.id, m.title, m.description, TO_CHAR(m.release_date, 'YYYY-MM-DD') as release_date, m.rating, a.id, a.name, a.gender, TO_CHAR(a.birth_date, 'YYYY-MM-DD') as birth_date
+            FROM movie m
+            LEFT JOIN movie_actor ma ON m.id = ma.movie_id
+            LEFT JOIN actor a ON ma.actor_id = a.id
+            WHERE m.title ILIKE '%' || $1 || '%'
+        `
+	rows, err := r.db.Query(query, titleFragment)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	found := false
+
+	for rows.Next() {
+		var movie model.MovieWithActors
+		var actor model.Actor
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.Rating, &actor.ID, &actor.Name, &actor.Gender, &actor.BirthDate)
+		if err != nil {
+			continue
+		}
+
+		found = true
+
+		if existingMovie, ok := moviesMap[movie.ID]; ok {
+			existingMovie.Actors = append(existingMovie.Actors, actor)
+			moviesMap[movie.ID] = existingMovie
+		} else {
+			movie.Actors = append(movie.Actors, actor)
+			moviesMap[movie.ID] = movie
+		}
+	}
+
+	if !found {
+		return nil, fmt.Errorf("no movies found with title fragment: %s", titleFragment)
+	}
+
+	for _, movie := range moviesMap {
+		movies = append(movies, movie)
+	}
+
+	return movies, nil
+}
+
+func (r *MoviePostgres) GetMoviesByActor(actorNameFragment string) ([]model.MovieWithActors, error) {
+	var moviesMap = make(map[int]model.MovieWithActors)
+	var movies []model.MovieWithActors
+
+	query := `
+            SELECT m.id, m.title, m.description, TO_CHAR(m.release_date, 'YYYY-MM-DD') as release_date, m.rating, a.id, a.name, a.gender, TO_CHAR(a.birth_date, 'YYYY-MM-DD') as birth_date
+            FROM movie m
+            LEFT JOIN movie_actor ma ON m.id = ma.movie_id
+            LEFT JOIN actor a ON ma.actor_id = a.id
+            WHERE a.name ILIKE '%' || $1 || '%'
+        `
+	rows, err := r.db.Query(query, actorNameFragment)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var movie model.MovieWithActors
+		var actor model.Actor
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.Rating, &actor.ID, &actor.Name, &actor.Gender, &actor.BirthDate)
+		if err != nil {
+			continue
+		}
+
+		if existingMovie, ok := moviesMap[movie.ID]; ok {
+			existingMovie.Actors = append(existingMovie.Actors, actor)
+			moviesMap[movie.ID] = existingMovie
+		} else {
+			movie.Actors = append(movie.Actors, actor)
+			moviesMap[movie.ID] = movie
+		}
+	}
+
+	if len(moviesMap) == 0 {
+		return nil, fmt.Errorf("no movies found for actor with name fragment: %s", actorNameFragment)
+	}
+
+	for _, movie := range moviesMap {
+		movies = append(movies, movie)
+	}
+
+	return movies, nil
 }

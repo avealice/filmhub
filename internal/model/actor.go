@@ -1,13 +1,16 @@
 package model
 
 type Actor struct {
-	ID        int    `json:"id"`
+	ID        int    `json:"-"`
 	Name      string `json:"name"`
 	Gender    string `json:"gender"`
 	BirthDate string `json:"birth_date"`
 }
 
 type ActorWithMovies struct {
-	Actor  Actor   `json:"actor"`
-	Movies []Movie `json:"movies"`
+	ID        int     `json:"-"`
+	Name      string  `json:"name"`
+	Gender    string  `json:"gender"`
+	BirthDate string  `json:"birth_date"`
+	Movies    []Movie `json:"movies"`
 }

@@ -35,6 +35,7 @@ func initConfig() error {
 
 func (a *App) Run() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
+	logrus.SetOutput(os.Stdout)
 
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err)

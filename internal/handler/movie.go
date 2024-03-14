@@ -62,7 +62,7 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input model.Movie
+	var input model.MovieWithActors
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -70,7 +70,7 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Movie.CreateMovie(input)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "failed to create movie")
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -114,6 +114,38 @@ func (h *Handler) deleteMovie(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("movie deleted successfully"))
 }
 
+func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	actor := r.URL.Query().Get("actor")
+	title := r.URL.Query().Get("title")
+
+	if (title == "" && actor == "") || (title != "" && actor != "") {
+		newErrorResponse(w, http.StatusBadRequest, "Invalid search request")
+		return
+	}
+
+	var movies []model.MovieWithActors
+	var err error
+
+	if title != "" {
+		movies, err = h.services.Movie.GetMoviesByTitle(title)
+	} else if actor != "" {
+		movies, err = h.services.Movie.GetMoviesByActor(actor)
+	}
+
+	if err != nil {
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(movies)
+}
+
 func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -135,12 +167,12 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	movieID, err := strconv.Atoi(parts[2])
-	if err != nil {
+	if err != nil || movieID < 0 {
 		newErrorResponse(w, http.StatusBadRequest, "Invalid movie ID")
 		return
 	}
 
-	var input model.Movie
+	var input model.MovieWithActors
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -148,13 +180,12 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.UpdateMovie(movieID, input)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "Failed to update movie")
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("movie updated successfully"))
-
 }
 
 func (h *Handler) getMovie(w http.ResponseWriter, r *http.Request) {
@@ -174,7 +205,7 @@ func (h *Handler) getMovie(w http.ResponseWriter, r *http.Request) {
 
 	movie, err := h.services.Movie.GetMovieByID(movieID)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, "Failed to get movie by ID")
+		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
