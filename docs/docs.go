@@ -9,24 +9,19 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
             "url": "http://www.github.com/avealice"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
     "paths": {
         "/api/actor": {
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Создает нового актера.",
@@ -37,7 +32,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "actors"
+                    "/api/actor"
                 ],
                 "summary": "Создать актера.",
                 "parameters": [
@@ -47,7 +42,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.Actor"
+                            "$ref": "#/definitions/model.Actor"
                         }
                     }
                 ],
@@ -57,6 +52,18 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -65,7 +72,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Получает информацию об актере по его идентификатору.",
@@ -73,7 +80,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "actors"
+                    "/api/actor/{id}"
                 ],
                 "summary": "Получить информацию об актере.",
                 "parameters": [
@@ -89,7 +96,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Actor"
+                            "$ref": "#/definitions/model.ActorWithMovies"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -97,7 +122,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Обновляет информацию об актере по его идентификатору.",
@@ -108,7 +133,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "actors"
+                    "/api/actor/{id}"
                 ],
                 "summary": "Обновить информацию об актере.",
                 "parameters": [
@@ -125,7 +150,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ActorWithMovies"
+                            "$ref": "#/definitions/model.ActorWithMovies"
                         }
                     }
                 ],
@@ -135,18 +160,36 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             },
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Удаляет актера по его идентификатору.",
                 "tags": [
-                    "actors"
+                    "/api/actor/{id}"
                 ],
                 "summary": "Удалить актера.",
                 "parameters": [
@@ -164,6 +207,24 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -172,7 +233,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Получить всех актеров из базы данных.",
@@ -180,7 +241,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "actors"
+                    "/api/actors"
                 ],
                 "summary": "Получить всех актеров.",
                 "responses": {
@@ -189,18 +250,84 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handler.Actor"
+                                "$ref": "#/definitions/model.ActorWithMovies"
                             }
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
             }
         },
         "/api/movie": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Создает новый фильм.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/api/movie"
+                ],
+                "summary": "Создать фильм",
+                "parameters": [
+                    {
+                        "description": "Данные нового фильма",
+                        "name": "movie",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MovieWithActors"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Фильм создан успешно"
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movie/search": {
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Выполняет поиск фильмов по указанным критериям (название или актер).",
@@ -208,7 +335,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "/api/movie/search"
                 ],
                 "summary": "Поиск фильмов",
                 "parameters": [
@@ -234,40 +361,24 @@ const docTemplate = `{
                                 "$ref": "#/definitions/model.MovieWithActors"
                             }
                         }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Создает новый фильм.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Создать фильм",
-                "parameters": [
-                    {
-                        "description": "Данные нового фильма",
-                        "name": "movie",
-                        "in": "body",
-                        "required": true,
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
                         "schema": {
-                            "$ref": "#/definitions/model.MovieWithActors"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Фильм создан успешно"
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -276,7 +387,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Получает информацию о фильме по его идентификатору.",
@@ -284,7 +395,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "/api/movie/{id}"
                 ],
                 "summary": "Получить информацию о фильме",
                 "parameters": [
@@ -302,13 +413,37 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.MovieWithActors"
                         }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             },
             "put": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Обновляет информацию о фильме.",
@@ -319,7 +454,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "/api/movie/{id}"
                 ],
                 "summary": "Обновить информацию о фильме",
                 "parameters": [
@@ -341,20 +476,44 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Фильм обновлен успешно"
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             },
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Удаляет фильм по его идентификатору.",
                 "tags": [
-                    "Movies"
+                    "/api/movie/{id}"
                 ],
                 "summary": "Удалить фильм",
                 "parameters": [
@@ -367,8 +526,32 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Фильм удален успешно"
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -377,7 +560,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Получает список всех фильмов с возможностью сортировки.",
@@ -385,7 +568,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "/api/movies"
                 ],
                 "summary": "Получить все фильмы",
                 "parameters": [
@@ -411,6 +594,24 @@ const docTemplate = `{
                                 "$ref": "#/definitions/model.Movie"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Некорректный метод",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -425,7 +626,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Авторизация"
+                    "/auth/"
                 ],
                 "summary": "Авторизация пользователя",
                 "parameters": [
@@ -450,13 +651,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос или данные",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -472,7 +673,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Регистрация"
+                    "/auth/"
                 ],
                 "summary": "Регистрация пользователя",
                 "parameters": [
@@ -497,13 +698,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос или данные",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -511,64 +712,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.Actor": {
+        "handler.ErrorResponse": {
+            "description": "JSON-структура ответа с сообщением об ошибке.",
             "type": "object",
             "properties": {
-                "birth_date": {
-                    "description": "Birth date of the actor",
-                    "type": "string"
-                },
-                "gender": {
-                    "description": "Gender of the actor",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name of the actor",
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ActorWithMovies": {
-            "type": "object",
-            "properties": {
-                "birth_date": {
-                    "description": "Birth date of the actor",
-                    "type": "string"
-                },
-                "gender": {
-                    "description": "Gender of the actor",
-                    "type": "string"
-                },
-                "movies": {
-                    "description": "Movies associated with the actor",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.Movie"
-                    }
-                },
-                "name": {
-                    "description": "Name of the actor",
-                    "type": "string"
-                }
-            }
-        },
-        "handler.Movie": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "description": "Description of the movie",
-                    "type": "string"
-                },
-                "rating": {
-                    "description": "Rating of the movie",
-                    "type": "integer"
-                },
-                "release_date": {
-                    "description": "Release date of the movie",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Title of the movie",
+                "message": {
                     "type": "string"
                 }
             }
@@ -584,15 +732,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.errorResponse": {
-            "description": "JSON-структура ответа с сообщением об ошибке.",
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "model.Actor": {
             "type": "object",
             "properties": {
@@ -603,6 +742,30 @@ const docTemplate = `{
                 "gender": {
                     "description": "Gender of the actor",
                     "type": "string"
+                },
+                "name": {
+                    "description": "Name of the actor",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ActorWithMovies": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "description": "Birth date of the actor",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "Gender of the actor",
+                    "type": "string"
+                },
+                "movies": {
+                    "description": "Movies associated with the actor",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Movie"
+                    }
                 },
                 "name": {
                     "description": "Name of the actor",
@@ -666,32 +829,34 @@ const docTemplate = `{
                     "description": "Password hash of the user",
                     "type": "string"
                 },
-                "role": {
-                    "description": "Role of the user",
-                    "type": "string"
-                },
                 "username": {
                     "description": "Username of the user",
                     "type": "string"
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "",
 	Host:             "127.0.0.1:8000",
-	BasePath:         "/v2",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "FilmHub API",
-	Description:      "API для работы с фильмами и актерами в FilmHub.",
+	Description:      "API для работы с фильмами и актерами в FilmHub. login: admin, password: kek",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
-    
 }
 
 func init() {

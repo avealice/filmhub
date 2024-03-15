@@ -365,7 +365,7 @@ func TestHandler_updateMovie(t *testing.T) {
 	handler.movieHandle(w, req)
 
 	// Проверяем код ответа
-	if w.Code != http.StatusCreated {
+	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 

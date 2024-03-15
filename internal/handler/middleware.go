@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -19,7 +20,7 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 // @Summary Проверка аутентификации пользователя
 // @Description Middleware для проверки аутентификации пользователя и установки его роли в контекст запроса
 // @Tags Authentication
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) userIdentity(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get(authorizationHeader)
@@ -28,18 +29,24 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 			return
 		}
 
+		// headerParts := strings.Split(header, " ")
+		// if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		// 	http.Error(w, "invalid auth header", http.StatusUnauthorized)
+		// 	return
+		// }
+		fmt.Println(header)
+		var token string
 		headerParts := strings.Split(header, " ")
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		if len(headerParts) > 2 || len(headerParts) == 0 {
 			http.Error(w, "invalid auth header", http.StatusUnauthorized)
 			return
+		} else if len(headerParts) == 2 {
+			token = headerParts[1]
+		} else {
+			token = headerParts[0]
 		}
 
-		if len(headerParts[1]) == 0 {
-			http.Error(w, "token is empty", http.StatusUnauthorized)
-			return
-		}
-
-		role, err := h.services.Authorization.ParseToken(headerParts[1])
+		role, err := h.services.Authorization.ParseToken(token)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

@@ -1,46 +1,9 @@
+basePath: /
 definitions:
-  handler.Actor:
+  handler.ErrorResponse:
+    description: JSON-структура ответа с сообщением об ошибке.
     properties:
-      birth_date:
-        description: Birth date of the actor
-        type: string
-      gender:
-        description: Gender of the actor
-        type: string
-      name:
-        description: Name of the actor
-        type: string
-    type: object
-  handler.ActorWithMovies:
-    properties:
-      birth_date:
-        description: Birth date of the actor
-        type: string
-      gender:
-        description: Gender of the actor
-        type: string
-      movies:
-        description: Movies associated with the actor
-        items:
-          $ref: '#/definitions/handler.Movie'
-        type: array
-      name:
-        description: Name of the actor
-        type: string
-    type: object
-  handler.Movie:
-    properties:
-      description:
-        description: Description of the movie
-        type: string
-      rating:
-        description: Rating of the movie
-        type: integer
-      release_date:
-        description: Release date of the movie
-        type: string
-      title:
-        description: Title of the movie
+      message:
         type: string
     type: object
   handler.SignInInput:
@@ -48,12 +11,6 @@ definitions:
       password:
         type: string
       username:
-        type: string
-    type: object
-  handler.errorResponse:
-    description: JSON-структура ответа с сообщением об ошибке.
-    properties:
-      message:
         type: string
     type: object
   model.Actor:
@@ -64,6 +21,23 @@ definitions:
       gender:
         description: Gender of the actor
         type: string
+      name:
+        description: Name of the actor
+        type: string
+    type: object
+  model.ActorWithMovies:
+    properties:
+      birth_date:
+        description: Birth date of the actor
+        type: string
+      gender:
+        description: Gender of the actor
+        type: string
+      movies:
+        description: Movies associated with the actor
+        items:
+          $ref: '#/definitions/model.Movie'
+        type: array
       name:
         description: Name of the actor
         type: string
@@ -108,9 +82,6 @@ definitions:
       password:
         description: Password hash of the user
         type: string
-      role:
-        description: Role of the user
-        type: string
       username:
         description: Username of the user
         type: string
@@ -118,15 +89,10 @@ definitions:
 host: 127.0.0.1:8000
 info:
   contact:
-    name: API Support
     url: http://www.github.com/avealice
-  description: API для работы с фильмами и актерами в FilmHub.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
+  description: 'API для работы с фильмами и актерами в FilmHub. login: admin, password:
+    kek'
   title: FilmHub API
-  version: "1.0"
 paths:
   /api/actor:
     post:
@@ -139,7 +105,7 @@ paths:
         name: actor
         required: true
         schema:
-          $ref: '#/definitions/handler.Actor'
+          $ref: '#/definitions/model.Actor'
       produces:
       - application/json
       responses:
@@ -147,11 +113,19 @@ paths:
           description: Актер успешно создан
           schema:
             type: string
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Создать актера.
       tags:
-      - actors
+      - /api/actor
   /api/actor/{id}:
     delete:
       description: Удаляет актера по его идентификатору.
@@ -166,11 +140,23 @@ paths:
           description: Актер успешно удален
           schema:
             type: string
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Удалить актера.
       tags:
-      - actors
+      - /api/actor/{id}
     get:
       description: Получает информацию об актере по его идентификатору.
       parameters:
@@ -185,12 +171,24 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Actor'
+            $ref: '#/definitions/model.ActorWithMovies'
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Получить информацию об актере.
       tags:
-      - actors
+      - /api/actor/{id}
     put:
       consumes:
       - application/json
@@ -206,7 +204,7 @@ paths:
         name: actor
         required: true
         schema:
-          $ref: '#/definitions/handler.ActorWithMovies'
+          $ref: '#/definitions/model.ActorWithMovies'
       produces:
       - application/json
       responses:
@@ -214,11 +212,23 @@ paths:
           description: Информация об актере успешно обновлена
           schema:
             type: string
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Обновить информацию об актере.
       tags:
-      - actors
+      - /api/actor/{id}
   /api/actors:
     get:
       description: Получить всех актеров из базы данных.
@@ -229,14 +239,167 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/handler.Actor'
+              $ref: '#/definitions/model.ActorWithMovies'
             type: array
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Получить всех актеров.
       tags:
-      - actors
+      - /api/actors
   /api/movie:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый фильм.
+      parameters:
+      - description: Данные нового фильма
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/model.MovieWithActors'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Фильм создан успешно
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Создать фильм
+      tags:
+      - /api/movie
+  /api/movie/{id}:
+    delete:
+      description: Удаляет фильм по его идентификатору.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Фильм удален успешно
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить фильм
+      tags:
+      - /api/movie/{id}
+    get:
+      description: Получает информацию о фильме по его идентификатору.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о фильме
+          schema:
+            $ref: '#/definitions/model.MovieWithActors'
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию о фильме
+      tags:
+      - /api/movie/{id}
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о фильме.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные о фильме
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/model.MovieWithActors'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Фильм обновлен успешно
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить информацию о фильме
+      tags:
+      - /api/movie/{id}
+  /api/movie/search:
     get:
       description: Выполняет поиск фильмов по указанным критериям (название или актер).
       parameters:
@@ -257,95 +420,23 @@ paths:
             items:
               $ref: '#/definitions/model.MovieWithActors'
             type: array
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Поиск фильмов
       tags:
-      - Movies
-    post:
-      consumes:
-      - application/json
-      description: Создает новый фильм.
-      parameters:
-      - description: Данные нового фильма
-        in: body
-        name: movie
-        required: true
-        schema:
-          $ref: '#/definitions/model.MovieWithActors'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Фильм создан успешно
-      security:
-      - BearerAuth: []
-      summary: Создать фильм
-      tags:
-      - Movies
-  /api/movie/{id}:
-    delete:
-      description: Удаляет фильм по его идентификатору.
-      parameters:
-      - description: Идентификатор фильма
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "201":
-          description: Фильм удален успешно
-      security:
-      - BearerAuth: []
-      summary: Удалить фильм
-      tags:
-      - Movies
-    get:
-      description: Получает информацию о фильме по его идентификатору.
-      parameters:
-      - description: Идентификатор фильма
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о фильме
-          schema:
-            $ref: '#/definitions/model.MovieWithActors'
-      security:
-      - BearerAuth: []
-      summary: Получить информацию о фильме
-      tags:
-      - Movies
-    put:
-      consumes:
-      - application/json
-      description: Обновляет информацию о фильме.
-      parameters:
-      - description: Идентификатор фильма
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Новые данные о фильме
-        in: body
-        name: movie
-        required: true
-        schema:
-          $ref: '#/definitions/model.MovieWithActors'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Фильм обновлен успешно
-      security:
-      - BearerAuth: []
-      summary: Обновить информацию о фильме
-      tags:
-      - Movies
+      - /api/movie/search
   /api/movies:
     get:
       description: Получает список всех фильмов с возможностью сортировки.
@@ -367,11 +458,23 @@ paths:
             items:
               $ref: '#/definitions/model.Movie'
             type: array
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Некорректный метод
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Получить все фильмы
       tags:
-      - Movies
+      - /api/movies
   /auth/sign-in:
     post:
       consumes:
@@ -396,14 +499,14 @@ paths:
         "400":
           description: Некорректный запрос или данные
           schema:
-            $ref: '#/definitions/handler.errorResponse'
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/handler.errorResponse'
+            $ref: '#/definitions/handler.ErrorResponse'
       summary: Авторизация пользователя
       tags:
-      - Авторизация
+      - /auth/
   /auth/sign-up:
     post:
       consumes:
@@ -427,17 +530,17 @@ paths:
         "400":
           description: Некорректный запрос или данные
           schema:
-            $ref: '#/definitions/handler.errorResponse'
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/handler.errorResponse'
+            $ref: '#/definitions/handler.ErrorResponse'
       summary: Регистрация пользователя
       tags:
-      - Регистрация
-swagger: "2.0"
+      - /auth/
 securityDefinitions:
-  BearerAuth:
-    type: apiKey
-    name: Authorization
+  ApiKeyAuth:
     in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

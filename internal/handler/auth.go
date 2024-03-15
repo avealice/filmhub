@@ -16,13 +16,13 @@ type SignInInput struct {
 //
 // @Summary Авторизация пользователя
 // @Description Авторизует пользователя с заданными учетными данными и возвращает токен доступа
-// @Tags Авторизация
+// @Tags /auth/
 // @Accept json
 // @Produce json
 // @Param request body SignInInput true "Данные для входа"
 // @Success 200 {object} map[string]interface{} "map[token]: Токен доступа"
-// @Failure 400 {object} errorResponse "Некорректный запрос или данные"
-// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /auth/sign-in [post]
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -53,13 +53,13 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary Регистрация пользователя
 // @Description Регистрирует нового пользователя с заданными данными
-// @Tags Регистрация
+// @Tags /auth/
 // @Accept json
 // @Produce json
 // @Param request body model.User true "Данные нового пользователя"
 // @Success 201 {object} map[string]interface{} "map[id]: ID нового пользователя"
-// @Failure 400 {object} errorResponse "Некорректный запрос или данные"
-// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

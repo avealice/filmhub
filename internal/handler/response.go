@@ -7,19 +7,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// errorResponse представляет JSON-структуру ответа с сообщением об ошибке.
+// ErrorResponse представляет JSON-структуру ответа с сообщением об ошибке.
 //
 // @title ErrorResponse
 // @description JSON-структура ответа с сообщением об ошибке.
-type errorResponse struct {
+type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-// // errorResponse представляет JSON-структуру ответа с сообщением об ошибке.
+// // ErrorResponse представляет JSON-структуру ответа с сообщением об ошибке.
 // //
 // // @title ErrorResponse
 // // @description JSON-структура ответа с сообщением об ошибке.
-// type errorResponse struct {
+// type ErrorResponse struct {
 // 	Message string `json:"message"`
 // }
 
@@ -31,7 +31,7 @@ type errorResponse struct {
 func newErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 	logrus.Error(message)
 
-	errRes := errorResponse{Message: message}
+	errRes := ErrorResponse{Message: message}
 	jsonResponse, err := json.Marshal(errRes)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

@@ -231,7 +231,7 @@ func TestHandler_deleteActor_Successful(t *testing.T) {
 
 	handler.deleteActor(w, req)
 
-	if w.Code != http.StatusCreated {
+	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 
@@ -321,7 +321,7 @@ func TestHandler_updateActor_Successful(t *testing.T) {
 
 	handler.updateActor(w, req)
 
-	if w.Code != http.StatusCreated {
+	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 

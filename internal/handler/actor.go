@@ -12,11 +12,13 @@ import (
 //
 // @Summary Получить всех актеров.
 // @Description Получить всех актеров из базы данных.
-// @Tags actors
+// @Tags /api/actors
 // @Produce json
-// @Success 200 {array} Actor
+// @Success 200 {array} model.ActorWithMovies
+// @Failure 405 {object} ErrorResponse "Некорректный метод"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actors [get]
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -37,13 +39,15 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary Создать актера.
 // @Description Создает нового актера.
-// @Tags actors
+// @Tags /api/actor
 // @Accept json
 // @Produce json
-// @Param actor body Actor true "Данные нового актера"
+// @Param actor body model.Actor true "Данные нового актера"
 // @Success 201 {string} string "Актер успешно создан"
+// @Failure 405 {object} ErrorResponse "Некорректный метод"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor [post]
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -76,11 +80,14 @@ func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary Удалить актера.
 // @Description Удаляет актера по его идентификатору.
-// @Tags actors
+// @Tags /api/actor/{id}
 // @Param id path int true "Идентификатор актера"
 // @Success 200 {string} string "Актер успешно удален"
+// @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 403 {object} ErrorResponse "Некорректная роль"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [delete]
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -113,7 +120,7 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("actor deleted successfully"))
 }
 
@@ -121,14 +128,17 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary Обновить информацию об актере.
 // @Description Обновляет информацию об актере по его идентификатору.
-// @Tags actors
+// @Tags /api/actor/{id}
 // @Accept json
 // @Produce json
 // @Param id path int true "Идентификатор актера"
-// @Param actor body ActorWithMovies true "Новые данные актера"
+// @Param actor body model.ActorWithMovies true "Новые данные актера"
 // @Success 200 {string} string "Информация об актере успешно обновлена"
+// @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 403 {object} ErrorResponse "Некорректная роль"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [put]
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -167,7 +177,7 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("actor updated successfully"))
 }
 
@@ -175,12 +185,15 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary Получить информацию об актере.
 // @Description Получает информацию об актере по его идентификатору.
-// @Tags actors
+// @Tags /api/actor/{id}
 // @Produce json
 // @Param id path int true "Идентификатор актера"
-// @Success 200 {object} Actor
+// @Success 200 {object} model.ActorWithMovies
+// @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 405 {object} ErrorResponse "Некорректный метод"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [get]
-// @Security BearerAuth
+// @Security ApiKeyAuth
 func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimSuffix(r.URL.Path, "/")
 	parts := strings.Split(path, "/")
