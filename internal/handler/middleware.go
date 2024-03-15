@@ -14,6 +14,12 @@ const (
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
 
+// userIdentity проверяет наличие и валидность токена аутентификации в заголовке запроса.
+// Если токен корректен, устанавливает роль пользователя в контекст запроса.
+// @Summary Проверка аутентификации пользователя
+// @Description Middleware для проверки аутентификации пользователя и установки его роли в контекст запроса
+// @Tags Authentication
+// @Security BearerAuth
 func (h *Handler) userIdentity(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get(authorizationHeader)
@@ -44,6 +50,11 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 	})
 }
 
+// getUserRole извлекает роль пользователя из контекста запроса.
+// Если роль отсутствует или имеет неверный тип, возвращает ошибку.
+// @Summary Извлечение роли пользователя
+// @Description Извлекает роль пользователя из контекста запроса
+// @Tags Authentication
 func getUserRole(r *http.Request) (string, error) {
 	role := r.Context().Value(userRoleCtx)
 	if role == nil {

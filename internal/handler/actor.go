@@ -21,6 +21,15 @@ func (h *Handler) actorHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getAllActors получает всех актеров.
+//
+// @Summary Получить всех актеров.
+// @Description Получить всех актеров из базы данных.
+// @Tags actors
+// @Produce json
+// @Success 200 {array} Actor
+// @Router /api/actors [get]
+// @Security BearerAuth
 func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -37,7 +46,18 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(actors)
 }
 
-func (h *Handler) createActor(w http.ResponseWriter, r *http.Request) {
+// createActor создает актера.
+//
+// @Summary Создать актера.
+// @Description Создает нового актера.
+// @Tags actors
+// @Accept json
+// @Produce json
+// @Param actor body Actor true "Данные нового актера"
+// @Success 201 {string} string "Актер успешно создан"
+// @Router /api/actor [post]
+// @Security BearerAuth
+func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, "failed to get user role")
@@ -65,6 +85,15 @@ func (h *Handler) createActor(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("actor created successfully"))
 }
 
+// deleteActor удаляет актера.
+//
+// @Summary Удалить актера.
+// @Description Удаляет актера по его идентификатору.
+// @Tags actors
+// @Param id path int true "Идентификатор актера"
+// @Success 200 {string} string "Актер успешно удален"
+// @Router /api/actor/{id} [delete]
+// @Security BearerAuth
 func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -101,6 +130,18 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("actor deleted successfully"))
 }
 
+// updateActor обновляет информацию об актере.
+//
+// @Summary Обновить информацию об актере.
+// @Description Обновляет информацию об актере по его идентификатору.
+// @Tags actors
+// @Accept json
+// @Produce json
+// @Param id path int true "Идентификатор актера"
+// @Param actor body ActorWithMovies true "Новые данные актера"
+// @Success 200 {string} string "Информация об актере успешно обновлена"
+// @Router /api/actor/{id} [put]
+// @Security BearerAuth
 func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -143,6 +184,16 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("actor updated successfully"))
 }
 
+// getActor получает информацию об актере.
+//
+// @Summary Получить информацию об актере.
+// @Description Получает информацию об актере по его идентификатору.
+// @Tags actors
+// @Produce json
+// @Param id path int true "Идентификатор актера"
+// @Success 200 {object} Actor
+// @Router /api/actor/{id} [get]
+// @Security BearerAuth
 func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimSuffix(r.URL.Path, "/")
 	parts := strings.Split(path, "/")

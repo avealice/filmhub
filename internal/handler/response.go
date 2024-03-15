@@ -7,10 +7,27 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// errorResponse представляет JSON-структуру ответа с сообщением об ошибке.
+//
+// @title ErrorResponse
+// @description JSON-структура ответа с сообщением об ошибке.
 type errorResponse struct {
 	Message string `json:"message"`
 }
 
+// // errorResponse представляет JSON-структуру ответа с сообщением об ошибке.
+// //
+// // @title ErrorResponse
+// // @description JSON-структура ответа с сообщением об ошибке.
+// type errorResponse struct {
+// 	Message string `json:"message"`
+// }
+
+// newErrorResponse создает новый JSON-ответ с сообщением об ошибке и отправляет его клиенту.
+//
+// @Summary Создать ответ с сообщением об ошибке.
+// @Description Создает новый JSON-ответ с заданным статусом кода и сообщением об ошибке, затем отправляет его клиенту.
+// @Tags Error Handling
 func newErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 	logrus.Error(message)
 

@@ -1,0 +1,438 @@
+definitions:
+  handler.Actor:
+    properties:
+      birth_date:
+        description: Birth date of the actor
+        type: string
+      gender:
+        description: Gender of the actor
+        type: string
+      name:
+        description: Name of the actor
+        type: string
+    type: object
+  handler.ActorWithMovies:
+    properties:
+      birth_date:
+        description: Birth date of the actor
+        type: string
+      gender:
+        description: Gender of the actor
+        type: string
+      movies:
+        description: Movies associated with the actor
+        items:
+          $ref: '#/definitions/handler.Movie'
+        type: array
+      name:
+        description: Name of the actor
+        type: string
+    type: object
+  handler.Movie:
+    properties:
+      description:
+        description: Description of the movie
+        type: string
+      rating:
+        description: Rating of the movie
+        type: integer
+      release_date:
+        description: Release date of the movie
+        type: string
+      title:
+        description: Title of the movie
+        type: string
+    type: object
+  handler.SignInInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.errorResponse:
+    description: JSON-структура ответа с сообщением об ошибке.
+    properties:
+      message:
+        type: string
+    type: object
+  model.Actor:
+    properties:
+      birth_date:
+        description: Birth date of the actor
+        type: string
+      gender:
+        description: Gender of the actor
+        type: string
+      name:
+        description: Name of the actor
+        type: string
+    type: object
+  model.Movie:
+    properties:
+      description:
+        description: Description of the movie
+        type: string
+      rating:
+        description: Rating of the movie
+        type: integer
+      release_date:
+        description: Release date of the movie
+        type: string
+      title:
+        description: Title of the movie
+        type: string
+    type: object
+  model.MovieWithActors:
+    properties:
+      actors:
+        description: Actors associated with the movie
+        items:
+          $ref: '#/definitions/model.Actor'
+        type: array
+      description:
+        description: Description of the movie
+        type: string
+      rating:
+        description: Rating of the movie
+        type: integer
+      release_date:
+        description: Release date of the movie
+        type: string
+      title:
+        description: Title of the movie
+        type: string
+    type: object
+  model.User:
+    properties:
+      password:
+        description: Password hash of the user
+        type: string
+      role:
+        description: Role of the user
+        type: string
+      username:
+        description: Username of the user
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    name: API Support
+    url: http://www.github.com/avealice
+  description: API для работы с фильмами и актерами в FilmHub.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: FilmHub API
+  version: "1.0"
+paths:
+  /api/actor:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового актера.
+      parameters:
+      - description: Данные нового актера
+        in: body
+        name: actor
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Actor'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Актер успешно создан
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать актера.
+      tags:
+      - actors
+  /api/actor/{id}:
+    delete:
+      description: Удаляет актера по его идентификатору.
+      parameters:
+      - description: Идентификатор актера
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Актер успешно удален
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить актера.
+      tags:
+      - actors
+    get:
+      description: Получает информацию об актере по его идентификатору.
+      parameters:
+      - description: Идентификатор актера
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Actor'
+      security:
+      - BearerAuth: []
+      summary: Получить информацию об актере.
+      tags:
+      - actors
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию об актере по его идентификатору.
+      parameters:
+      - description: Идентификатор актера
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные актера
+        in: body
+        name: actor
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ActorWithMovies'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация об актере успешно обновлена
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить информацию об актере.
+      tags:
+      - actors
+  /api/actors:
+    get:
+      description: Получить всех актеров из базы данных.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.Actor'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Получить всех актеров.
+      tags:
+      - actors
+  /api/movie:
+    get:
+      description: Выполняет поиск фильмов по указанным критериям (название или актер).
+      parameters:
+      - description: Название фильма для поиска
+        in: query
+        name: title
+        type: string
+      - description: Имя актера для поиска
+        in: query
+        name: actor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список фильмов, удовлетворяющих критериям поиска
+          schema:
+            items:
+              $ref: '#/definitions/model.MovieWithActors'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Поиск фильмов
+      tags:
+      - Movies
+    post:
+      consumes:
+      - application/json
+      description: Создает новый фильм.
+      parameters:
+      - description: Данные нового фильма
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/model.MovieWithActors'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Фильм создан успешно
+      security:
+      - BearerAuth: []
+      summary: Создать фильм
+      tags:
+      - Movies
+  /api/movie/{id}:
+    delete:
+      description: Удаляет фильм по его идентификатору.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Фильм удален успешно
+      security:
+      - BearerAuth: []
+      summary: Удалить фильм
+      tags:
+      - Movies
+    get:
+      description: Получает информацию о фильме по его идентификатору.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о фильме
+          schema:
+            $ref: '#/definitions/model.MovieWithActors'
+      security:
+      - BearerAuth: []
+      summary: Получить информацию о фильме
+      tags:
+      - Movies
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о фильме.
+      parameters:
+      - description: Идентификатор фильма
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные о фильме
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/model.MovieWithActors'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Фильм обновлен успешно
+      security:
+      - BearerAuth: []
+      summary: Обновить информацию о фильме
+      tags:
+      - Movies
+  /api/movies:
+    get:
+      description: Получает список всех фильмов с возможностью сортировки.
+      parameters:
+      - description: Критерий сортировки (например, 'rating')
+        in: query
+        name: sort_by
+        type: string
+      - description: Порядок сортировки (например, 'asc' или 'desc')
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список фильмов
+          schema:
+            items:
+              $ref: '#/definitions/model.Movie'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Получить все фильмы
+      tags:
+      - Movies
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя с заданными учетными данными и возвращает
+        токен доступа
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'map[token]: Токен доступа'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Авторизация пользователя
+      tags:
+      - Авторизация
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя с заданными данными
+      parameters:
+      - description: Данные нового пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 'map[id]: ID нового пользователя'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Регистрация пользователя
+      tags:
+      - Регистрация
+swagger: "2.0"

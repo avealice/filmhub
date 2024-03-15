@@ -23,6 +23,16 @@ func (h *Handler) movieHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getAllMovies возвращает список всех фильмов.
+// @Summary Получить все фильмы
+// @Description Получает список всех фильмов с возможностью сортировки.
+// @Tags Movies
+// @Produce json
+// @Param sort_by query string false "Критерий сортировки (например, 'rating')"
+// @Param sort_order query string false "Порядок сортировки (например, 'asc' или 'desc')"
+// @Success 200 {array} model.Movie "Список фильмов"
+// @Router /api/movies [get]
+// @Security BearerAuth
 func (h *Handler) getAllMovies(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -50,6 +60,16 @@ func (h *Handler) getAllMovies(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(movies)
 }
 
+// createMovie создает новый фильм.
+// @Summary Создать фильм
+// @Description Создает новый фильм.
+// @Tags Movies
+// @Accept json
+// @Produce json
+// @Param movie body model.MovieWithActors true "Данные нового фильма"
+// @Success 201 "Фильм создан успешно"
+// @Router /api/movie [post]
+// @Security BearerAuth
 func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -78,6 +98,14 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("movie created successfully"))
 }
 
+// deleteMovie удаляет фильм по его идентификатору.
+// @Summary Удалить фильм
+// @Description Удаляет фильм по его идентификатору.
+// @Tags Movies
+// @Param id path int true "Идентификатор фильма"
+// @Success 201 "Фильм удален успешно"
+// @Router /api/movie/{id} [delete]
+// @Security BearerAuth
 func (h *Handler) deleteMovie(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -110,10 +138,20 @@ func (h *Handler) deleteMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("movie deleted successfully"))
 }
 
+// searchMovie выполняет поиск фильмов по указанным критериям.
+// @Summary Поиск фильмов
+// @Description Выполняет поиск фильмов по указанным критериям (название или актер).
+// @Tags Movies
+// @Produce json
+// @Param title query string false "Название фильма для поиска"
+// @Param actor query string false "Имя актера для поиска"
+// @Success 200 {array} model.MovieWithActors "Список фильмов, удовлетворяющих критериям поиска"
+// @Router /api/movie [get]
+// @Security BearerAuth
 func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -146,6 +184,17 @@ func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(movies)
 }
 
+// updateMovie обновляет информацию о фильме.
+// @Summary Обновить информацию о фильме
+// @Description Обновляет информацию о фильме.
+// @Tags Movies
+// @Accept json
+// @Produce json
+// @Param id path int true "Идентификатор фильма"
+// @Param movie body model.MovieWithActors true "Новые данные о фильме"
+// @Success 201 "Фильм обновлен успешно"
+// @Router /api/movie/{id} [put]
+// @Security BearerAuth
 func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 	role, err := getUserRole(r)
 	if err != nil {
@@ -188,6 +237,15 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("movie updated successfully"))
 }
 
+// getMovie возвращает информацию о фильме по его идентификатору.
+// @Summary Получить информацию о фильме
+// @Description Получает информацию о фильме по его идентификатору.
+// @Tags Movies
+// @Produce json
+// @Param id path int true "Идентификатор фильма"
+// @Success 200 {object} model.MovieWithActors "Информация о фильме"
+// @Router /api/movie/{id} [get]
+// @Security BearerAuth
 func (h *Handler) getMovie(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimSuffix(r.URL.Path, "/")
 	parts := strings.Split(path, "/")
