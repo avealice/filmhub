@@ -281,6 +281,64 @@ func TestHandler_deleteMovie_Unsuccessful(t *testing.T) {
 	}
 }
 
+func TestHandler_deleteMovie_NotAdmin(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	req := httptest.NewRequest("DELETE", "/movie/1", nil)
+	ctx := context.WithValue(req.Context(), userRoleCtx, "user") // Устанавливаем не администратора в контексте
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.deleteMovie(w, req)
+
+	if w.Code != http.StatusForbidden {
+		t.Errorf("Expected status code %d, got %d", http.StatusForbidden, w.Code)
+	}
+
+	expectedResponse := "{\"message\":\"only admin can delete movies\"}"
+	if w.Body.String() != expectedResponse {
+		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
+	}
+}
+
+func TestHandler_deleteMovie_InvalidMovieID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	req := httptest.NewRequest("DELETE", "/movie/invalid_id", nil) // Используем некорректный формат идентификатора фильма
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.movieHandle(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
+	}
+
+	expectedResponse := "{\"message\":\"Invalid movie ID\"}"
+	if w.Body.String() != expectedResponse {
+		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
+	}
+}
+
 func TestHandler_updateMovie(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -304,7 +362,7 @@ func TestHandler_updateMovie(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Вызываем тестируемый хендлер
-	handler.updateMovie(w, req)
+	handler.movieHandle(w, req)
 
 	// Проверяем код ответа
 	if w.Code != http.StatusCreated {
@@ -414,7 +472,7 @@ func TestHandler_getMovie_Successful(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Вызываем тестируемый хендлер
-	handler.getMovie(w, req)
+	handler.movieHandle(w, req)
 
 	// Проверяем код ответа
 	if w.Code != http.StatusOK {
@@ -485,6 +543,123 @@ func TestHandler_searchMovie(t *testing.T) {
 		t.Errorf("Error marshaling expected movie: %v", err)
 	}
 	if w.Body.String() != string(expectedResponse)+"\n" {
+		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
+	}
+}
+
+func TestHandler_searchMovie_EmptyParams(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	// Проверка случая, когда оба параметра пустые строки
+	req := httptest.NewRequest("GET", "/movie", nil)
+	w := httptest.NewRecorder()
+
+	handler.searchMovie(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d for empty params, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestHandler_searchMovie_InvalidRequest(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	// Проверка случая, когда оба параметра указаны
+	req := httptest.NewRequest("GET", "/movie?title=Movie&actor=Actor", nil)
+	w := httptest.NewRecorder()
+
+	handler.searchMovie(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d for invalid request, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestHandler_updateMovie_MethodNotAllowed(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	// Создаем мок сервиса Movie
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	// Создаем Handler
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	// Создаем тестируемый хендлер
+	req := httptest.NewRequest("POST", "/api/movie/1", nil)       // Используем метод POST, который не поддерживается для обновления фильма
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	// Вызываем тестируемый хендлер
+	handler.updateMovie(w, req)
+
+	// Проверяем код ответа
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, w.Code)
+	}
+
+	// Проверяем тело ответа
+	expectedResponse := "{\"message\":\"Method not allowed\"}"
+	if w.Body.String() != expectedResponse {
+		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
+	}
+}
+
+func TestHandler_updateMovie_InvalidMovieID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	// Создаем мок сервиса Movie
+	mockMovieService := mock_service.NewMockMovie(ctrl)
+
+	// Создаем Handler
+	handler := &Handler{
+		services: &service.Service{
+			Movie: mockMovieService,
+		},
+	}
+
+	// Создаем тестируемый хендлер
+	reqBody := `{"title":"Updated Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
+	req := httptest.NewRequest("PUT", "/movie/invalid_id", strings.NewReader(reqBody)) // Передаем некорректный идентификатор фильма
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")                      // Устанавливаем роль в контексте
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	// Вызываем тестируемый хендлер
+	handler.updateMovie(w, req)
+
+	// Проверяем код ответа
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
+	}
+
+	// Проверяем тело ответа
+	expectedResponse := "{\"message\":\"Invalid movie ID\"}"
+	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
 	}
 }

@@ -21,7 +21,6 @@ const docTemplate = `{
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
     "paths": {
         "/api/actor": {
             "post": {
@@ -683,7 +682,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8000",
+	Host:             "127.0.0.1:8000",
 	BasePath:         "/v2",
 	Schemes:          []string{},
 	Title:            "FilmHub API",
@@ -692,6 +691,7 @@ var SwaggerInfo = &swag.Spec{
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
+    
 }
 
 func init() {

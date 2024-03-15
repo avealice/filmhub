@@ -8,21 +8,6 @@ import (
 	"strings"
 )
 
-func (h *Handler) movieHandle(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		h.createMovie(w, r)
-	case http.MethodDelete:
-		h.deleteMovie(w, r)
-	case http.MethodPut:
-		h.updateMovie(w, r)
-	case http.MethodGet:
-		h.getMovie(w, r)
-	default:
-		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
-	}
-}
-
 // getAllMovies возвращает список всех фильмов.
 // @Summary Получить все фильмы
 // @Description Получает список всех фильмов с возможностью сортировки.
@@ -273,5 +258,20 @@ func (h *Handler) getMovie(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to encode movie to JSON")
 		return
+	}
+}
+
+func (h *Handler) movieHandle(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		h.createMovie(w, r)
+	case http.MethodDelete:
+		h.deleteMovie(w, r)
+	case http.MethodPut:
+		h.updateMovie(w, r)
+	case http.MethodGet:
+		h.getMovie(w, r)
+	default:
+		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
 }

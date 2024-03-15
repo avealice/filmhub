@@ -1,12 +1,11 @@
-// Package handler предоставляет обработчики HTTP-запросов для filmhub.
 package handler
 
 import (
+	_ "filmhub/docs"
 	"filmhub/internal/service"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
+
+	httpSwagger "filmhub/httpswagger"
 )
 
 type Handler struct {
@@ -17,40 +16,25 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-// @title FilmHub API
-// @version 1.0
-// @description API для работы с фильмами и актерами в FilmHub.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.github.com/avealice
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:8000
-// @BasePath /api/
 func (h *Handler) InitRoutes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open("docs/swagger.json")
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to open swagger.json: %v", err), http.StatusInternalServerError)
+	mux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			// Обработка запросов OPTIONS
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
 			return
 		}
-		defer file.Close()
 
-		w.Header().Set("Content-Type", "application/json")
-
-		_, err = io.Copy(w, file)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to copy swagger.json to response: %v", err), http.StatusInternalServerError)
-			return
-		}
+		httpSwagger.Handler(
+			httpSwagger.URL("http://127.0.0.1:8000/swagger/doc.json"),
+			httpSwagger.DeepLinking(true),
+			httpSwagger.DocExpansion("none"),
+			httpSwagger.DomID("swagger-ui"),
+		).ServeHTTP(w, r)
 	})
-
-	mux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.Dir("swagger-ui"))))
 
 	authMux := http.NewServeMux()
 	authMux.HandleFunc("/sign-in", h.signIn)

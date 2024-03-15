@@ -8,19 +8,6 @@ import (
 	"strings"
 )
 
-func (h *Handler) actorHandle(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodDelete:
-		h.deleteActor(w, r)
-	case http.MethodPut:
-		h.updateActor(w, r)
-	case http.MethodGet:
-		h.getActor(w, r)
-	default:
-		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
-	}
-}
-
 // getAllActors получает всех актеров.
 //
 // @Summary Получить всех актеров.
@@ -221,5 +208,18 @@ func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to encode movie to JSON")
 		return
+	}
+}
+
+func (h *Handler) actorHandle(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodDelete:
+		h.deleteActor(w, r)
+	case http.MethodPut:
+		h.updateActor(w, r)
+	case http.MethodGet:
+		h.getActor(w, r)
+	default:
+		newErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
 }
