@@ -3,8 +3,9 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"filmhub/internal/model"
 	"fmt"
+
+	"github.com/avealice/filmhub/internal/model"
 
 	"github.com/jmoiron/sqlx"
 )

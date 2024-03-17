@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"filmhub/internal/model"
-	"filmhub/internal/service"
-	mock_service "filmhub/internal/service/mocks"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/service"
+
+	mock_service "github.com/avealice/filmhub/internal/service/mocks"
 
 	"github.com/golang/mock/gomock"
 )
@@ -112,7 +114,7 @@ func TestHandler_CreateActor_Successful(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockActorService := mock_service.NewMockActor(ctrl)
-	mockActorService.EXPECT().CreateActor(gomock.Any()).Return(nil)
+	mockActorService.EXPECT().CreateActor(gomock.Any()).Return(0, nil)
 
 	handler := &Handler{
 		services: &service.Service{
@@ -143,7 +145,7 @@ func TestHandler_CreateActor_Unsuccessful(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockActorService := mock_service.NewMockActor(ctrl)
-	mockActorService.EXPECT().CreateActor(gomock.Any()).Return(errors.New("Failed to create actor"))
+	mockActorService.EXPECT().CreateActor(gomock.Any()).Return(-1, errors.New("Failed to create actor"))
 
 	handler := &Handler{
 		services: &service.Service{

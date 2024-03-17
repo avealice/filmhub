@@ -2,14 +2,15 @@ package app
 
 import (
 	"context"
-	"filmhub/internal/handler"
-	"filmhub/internal/repository"
-	"filmhub/internal/service"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/avealice/filmhub/internal/handler"
+	"github.com/avealice/filmhub/internal/repository"
+	"github.com/avealice/filmhub/internal/service"
 
 	_ "github.com/lib/pq"
 
@@ -34,7 +35,10 @@ func initConfig() error {
 }
 
 func (a *App) Run() {
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
+	})
 	logrus.SetOutput(os.Stdout)
 
 	if err := initConfig(); err != nil {
@@ -65,17 +69,15 @@ func (a *App) Run() {
 		logrus.Fatalf("error occured while running http server: %s", err)
 	}
 
-	logrus.Print("Filmoteca Started")
-
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Print("Filmoteca Shutting Down")
-
 	if err := a.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
+
+	logrus.Print("Filmoteca Shutting Down")
 
 	if err := db.Close(); err != nil {
 		logrus.Errorf("error occured on db connection close: %s", err.Error())
@@ -91,7 +93,13 @@ func (a *App) run(port string, handler http.Handler) error {
 		WriteTimeout:   10 * time.Second,
 	}
 
-	return a.httpServer.ListenAndServe()
+	logrus.Print("Filmoteca Started")
+
+	if err := a.httpServer.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) Shutdown(ctx context.Context) error {

@@ -823,10 +823,6 @@ const docTemplate = `{
                     "description": "Gender of the actor",
                     "type": "string"
                 },
-                "id": {
-                    "description": "Unique identifier for the actor",
-                    "type": "integer"
-                },
                 "name": {
                     "description": "Name of the actor",
                     "type": "string"
@@ -919,10 +915,6 @@ const docTemplate = `{
                 "description": {
                     "description": "Description of the movie",
                     "type": "string"
-                },
-                "id": {
-                    "description": "Unique identifier for the movie",
-                    "type": "integer"
                 },
                 "rating": {
                     "description": "Rating of the movie",

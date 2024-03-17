@@ -5,7 +5,7 @@
 package mock_service
 
 import (
-	model "filmhub/internal/model"
+	model "github.com/avealice/filmhub/internal/model"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -64,12 +64,13 @@ func (mr *MockAuthorizationMockRecorder) GenerateToken(username, password interf
 }
 
 // ParseToken mocks base method
-func (m *MockAuthorization) ParseToken(token string) (string, error) {
+func (m *MockAuthorization) ParseToken(token string) (int, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ParseToken", token)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ParseToken indicates an expected call of ParseToken
@@ -227,11 +228,12 @@ func (m *MockActor) EXPECT() *MockActorMockRecorder {
 }
 
 // CreateActor mocks base method
-func (m *MockActor) CreateActor(actor model.InputActor) error {
+func (m *MockActor) CreateActor(actor model.InputActor) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateActor", actor)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateActor indicates an expected call of CreateActor
@@ -296,18 +298,4 @@ func (m *MockActor) Update(actorID int, data model.InputActor) error {
 func (mr *MockActorMockRecorder) Update(actorID, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockActor)(nil).Update), actorID, data)
-}
-
-// AddActorToMovie mocks base method
-func (m *MockActor) AddActorToMovie(actorID, movieID int) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddActorToMovie", actorID, movieID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AddActorToMovie indicates an expected call of AddActorToMovie
-func (mr *MockActorMockRecorder) AddActorToMovie(actorID, movieID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddActorToMovie", reflect.TypeOf((*MockActor)(nil).AddActorToMovie), actorID, movieID)
 }

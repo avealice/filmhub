@@ -1,8 +1,8 @@
 package service
 
 import (
-	"filmhub/internal/model"
-	"filmhub/internal/repository"
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/repository"
 )
 
 type MovieService struct {

@@ -3,9 +3,10 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"filmhub/internal/model"
 	"fmt"
 	"strings"
+
+	"github.com/avealice/filmhub/internal/model"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -20,25 +21,74 @@ func NewActorPostgres(db *sqlx.DB) *ActorPostgres {
 	}
 }
 
-func (r *ActorPostgres) CreateActor(actor model.InputActor) error {
+// func (r *ActorPostgres) CreateActor(actor model.InputActor) (int, error) {
+// 	var existingActorID int
+// 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = $1 AND gender = $2 AND birth_date = $3", actorsTable)
+// 	err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&existingActorID)
+// 	if err != nil && err != sql.ErrNoRows {
+// 		return 0, err
+// 	}
+
+// 	if err == nil {
+// 		return 0, errors.New("actor with the same name, gender, and birth date already exists")
+// 	}
+
+// 	insertQuery := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3) RETURNING id", actorsTable)
+// 	var insertedID int
+// 	err = r.db.QueryRow(insertQuery, actor.Name, actor.Gender, actor.BirthDate).Scan(&insertedID)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	return insertedID, nil
+// }
+
+func (r *ActorPostgres) CreateActor(actor model.InputActor) (int, error) {
 	var existingActorID int
 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = $1 AND gender = $2 AND birth_date = $3", actorsTable)
 	err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&existingActorID)
 	if err != nil && err != sql.ErrNoRows {
-		return err
+		return 0, err
 	}
 
 	if err == nil {
-		return errors.New("actor with the same name, gender, and birth date already exists")
+		return 0, errors.New("actor with the same name, gender, and birth date already exists")
 	}
 
-	insertQuery := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3)", actorsTable)
-	_, err = r.db.Exec(insertQuery, actor.Name, actor.Gender, actor.BirthDate)
+	insertQuery := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3) RETURNING id", actorsTable)
+	var insertedID int
+	err = r.db.QueryRow(insertQuery, actor.Name, actor.Gender, actor.BirthDate).Scan(&insertedID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	for _, movie := range actor.Movies {
+		var existingMovieID int
+		query := fmt.Sprintf("SELECT id FROM %s WHERE title = $1 AND description = $2 AND rating = $3 AND release_date = $4", moviesTable)
+		err := r.db.QueryRow(query, movie.Title, movie.Description, movie.Rating, movie.ReleaseDate).Scan(&existingMovieID)
+		if err != nil && err != sql.ErrNoRows {
+			return 0, err
+		}
+
+		if err == nil {
+			continue
+		}
+
+		movieQuery := fmt.Sprintf("INSERT INTO %s (title, description, rating, release_date) VALUES ($1, $2, $3, $4) RETURNING id", moviesTable)
+		var movieID int
+		err = r.db.QueryRow(movieQuery, movie.Title, movie.Description, movie.Rating, movie.ReleaseDate).Scan(&movieID)
+		if err != nil {
+			return 0, err
+		}
+
+		query = fmt.Sprintf("INSERT INTO %s (movie_id, actor_id) VALUES ($1, $2)", movieActorTable)
+		_, err = r.db.Exec(query, movieID, insertedID)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return insertedID, nil
 }
 
 func (r *ActorPostgres) GetAllActors() ([]model.ActorWithMovies, error) {

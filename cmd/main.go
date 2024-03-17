@@ -1,11 +1,11 @@
 package main
 
 import (
-	"filmhub/internal/app"
-	_ "filmhub/internal/handler"
-	_ "filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/app"
+	_ "github.com/avealice/filmhub/internal/handler"
+	_ "github.com/avealice/filmhub/internal/model"
 
-	_ "filmhub/docs"
+	_ "github.com/avealice/filmhub/docs"
 )
 
 // @title FilmHub API

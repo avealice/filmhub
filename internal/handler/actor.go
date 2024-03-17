@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"filmhub/internal/model"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/sirupsen/logrus"
 )
 
 // getAllActors получает всех актеров.
@@ -32,6 +34,13 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to get actors")
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logrus.WithFields(logrus.Fields{
+		"user_id": userID,
+		"count":   len(actors),
+	}).Info("Actors successfully fetched")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(actors)
@@ -69,11 +78,20 @@ func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.services.Actor.CreateActor(input)
+	actorID, err := h.services.Actor.CreateActor(input)
 	if err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id":  userID,
+		"actor_id": actorID,
+	})
+
+	logEntry.Info("Actor created successfully")
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("actor created successfully"))
@@ -124,6 +142,15 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id":  userID,
+		"actor_id": actorID,
+	})
+
+	logEntry.Info("Actor deleted successfully")
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("actor deleted successfully"))
 }
@@ -164,8 +191,8 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	actodID, err := strconv.Atoi(parts[2])
-	if err != nil || actodID < 0 {
+	actorID, err := strconv.Atoi(parts[2])
+	if err != nil || actorID < 0 {
 		newErrorResponse(w, http.StatusBadRequest, "Invalid actor ID")
 		return
 	}
@@ -176,12 +203,21 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.services.Actor.Update(actodID, input)
+	err = h.services.Actor.Update(actorID, input)
 	if err != nil {
 		fmt.Println(err.Error())
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to update actor")
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id":  userID,
+		"actor_id": actorID,
+	})
+
+	logEntry.Info("Actor updates successfully")
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("actor updated successfully"))
@@ -221,6 +257,11 @@ func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"actor_id": actorID,
+		"actor":    actor,
+	}).Info("Actor information successfully retrieved")
 
 	w.Header().Set("Content-Type", "application/json")
 

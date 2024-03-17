@@ -3,8 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"filmhub/internal/model"
 	"net/http"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/sirupsen/logrus"
 )
 
 type SignInInput struct {
@@ -45,6 +47,10 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logrus.WithField("user_id", userID).Info("User signed in successfully")
 
 	response := TokenResponse{Token: token}
 	w.Header().Set("Content-Type", "application/json")
@@ -87,6 +93,8 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	logrus.WithField("userID", id).Info("User signed up successfully")
 
 	response := UserIDResponse{ID: id}
 	w.Header().Set("Content-Type", "application/json")

@@ -10,6 +10,7 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userRoleCtx         = "role"
+	userIDCtx           = "user_id"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -39,13 +40,14 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 			token = headerParts[0]
 		}
 
-		role, err := h.services.Authorization.ParseToken(token)
+		user_id, role, err := h.services.Authorization.ParseToken(token)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), userRoleCtx, role)
+		ctx = context.WithValue(ctx, userIDCtx, user_id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -67,4 +69,23 @@ func getUserRole(r *http.Request) (string, error) {
 	}
 
 	return roleStr, nil
+}
+
+// getUserID извлекает идентификатор пользователя из контекста запроса.
+// Если идентификатор отсутствует или имеет неверный тип, возвращает ошибку.
+// @Summary Извлечение идентификатора пользователя
+// @Description Извлекает идентификатор пользователя из контекста запроса
+// @Tags Authentication
+func getUserID(r *http.Request) (int, error) {
+	userID := r.Context().Value(userIDCtx)
+	if userID == nil {
+		return 0, errors.New("user ID not found")
+	}
+
+	userIDInt, ok := userID.(int)
+	if !ok {
+		return 0, errors.New("user ID is invalid type")
+	}
+
+	return userIDInt, nil
 }

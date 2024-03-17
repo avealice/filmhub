@@ -15,14 +15,6 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-// // ErrorResponse представляет JSON-структуру ответа с сообщением об ошибке.
-// //
-// // @title ErrorResponse
-// // @description JSON-структура ответа с сообщением об ошибке.
-// type ErrorResponse struct {
-// 	Message string `json:"message"`
-// }
-
 // newErrorResponse создает новый JSON-ответ с сообщением об ошибке и отправляет его клиенту.
 //
 // @Summary Создать ответ с сообщением об ошибке.

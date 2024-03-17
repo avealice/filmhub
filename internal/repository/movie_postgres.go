@@ -3,9 +3,10 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"filmhub/internal/model"
 	"fmt"
 	"strings"
+
+	"github.com/avealice/filmhub/internal/model"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -97,6 +98,7 @@ func (r *MoviePostgres) CreateMovie(movie model.InputMovie) error {
 
 	return nil
 }
+
 func (r *MoviePostgres) GetMovieByID(movieID int) (model.MovieWithActors, error) {
 	var movie model.MovieWithActors
 

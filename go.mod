@@ -1,4 +1,4 @@
-module filmhub
+module github.com/avealice/filmhub
 
 go 1.21.6
 

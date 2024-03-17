@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"filmhub/internal/model"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/sirupsen/logrus"
 )
 
 // getAllMovies возвращает список всех фильмов.
@@ -44,6 +46,13 @@ func (h *Handler) getAllMovies(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to get movies")
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logrus.WithFields(logrus.Fields{
+		"user_id": userID,
+		"count":   len(movies),
+	}).Info("Movies successfully fetched")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(movies)
@@ -86,6 +95,14 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id": userID,
+	})
+
+	logEntry.Info("Movie created successfully")
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("movie created successfully"))
@@ -136,6 +153,14 @@ func (h *Handler) deleteMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id":  userID,
+		"movie_id": movieID,
+	})
+	logEntry.Info("Deleting movie")
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("movie deleted successfully"))
 }
@@ -181,6 +206,17 @@ func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	// Логируем успешный поиск фильмов
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id":          userID,
+		"title":            title,
+		"actor":            actor,
+		"num_movies_found": len(movies),
+	})
+	logEntry.Info("Movies search successful")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(movies)
@@ -240,6 +276,14 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"movie_id":   movieID,
+		"updated_by": userID,
+	})
+	logEntry.Info("Movie updated successfully")
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("movie updated successfully"))
 }
@@ -278,6 +322,13 @@ func (h *Handler) getMovie(w http.ResponseWriter, r *http.Request) {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	userID, _ := getUserID(r)
+
+	logEntry := logrus.WithFields(logrus.Fields{
+		"user_id": userID,
+	})
+	logEntry.Info("Getting movie information")
 
 	w.Header().Set("Content-Type", "application/json")
 

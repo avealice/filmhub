@@ -2,10 +2,10 @@ package model
 
 // Movie represents a movie in the system.
 type Movie struct {
-	ID          int    `json:"id" db:"id"`                     // Unique identifier for the movie
+	ID          int    `json:"-" db:"id"`                      // Unique identifier for the movie
 	Title       string `json:"title" db:"title"`               // Title of the movie
 	Description string `json:"description" db:"description"`   // Description of the movie
-	ReleaseDate string `json:"release_date" db:"release_date"` // Release date of the movie
+	ReleaseDate string `json:"release_date" db:"release_date"` // Format: "YYYY-M-D".
 	Rating      int    `json:"rating" db:"rating"`             // Rating of the movie
 }
 
@@ -14,7 +14,7 @@ type MovieWithActors struct {
 	ID          int     `json:"id" db:"id"`                     // Unique identifier for the movie
 	Title       string  `json:"title" db:"title"`               // Title of the movie
 	Description string  `json:"description" db:"description"`   // Description of the movie
-	ReleaseDate string  `json:"release_date" db:"release_date"` // Release date of the movie
+	ReleaseDate string  `json:"release_date" db:"release_date"` // Format: "YYYY-M-D".
 	Rating      int     `json:"rating" db:"rating"`             // Rating of the movie
 	Actors      []Actor `json:"actors"`                         // Actors associated with the movie
 }
@@ -22,7 +22,7 @@ type MovieWithActors struct {
 type InputMovie struct {
 	Title       string  `json:"title" db:"title"`               // Title of the movie
 	Description string  `json:"description" db:"description"`   // Description of the movie
-	ReleaseDate string  `json:"release_date" db:"release_date"` // Release date of the movie
+	ReleaseDate string  `json:"release_date" db:"release_date"` // Format: "YYYY-M-D".
 	Rating      int     `json:"rating" db:"rating"`             // Rating of the movie
 	Actors      []Actor `json:"actors"`                         // Actors associated with the movie
 }

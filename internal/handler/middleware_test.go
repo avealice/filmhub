@@ -2,11 +2,13 @@ package handler
 
 import (
 	"errors"
-	"filmhub/internal/service"
-	mock_service "filmhub/internal/service/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/avealice/filmhub/internal/service"
+
+	mock_service "github.com/avealice/filmhub/internal/service/mocks"
 
 	"github.com/golang/mock/gomock"
 )
@@ -16,7 +18,7 @@ func TestHandler_userIdentity_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockAuthService := mock_service.NewMockAuthorization(ctrl)
-	mockAuthService.EXPECT().ParseToken(gomock.Any()).Return("user", nil)
+	mockAuthService.EXPECT().ParseToken(gomock.Any()).Return(1, "user", nil)
 
 	handler := &Handler{
 		services: &service.Service{
@@ -78,7 +80,7 @@ func TestHandler_userIdentity_InvalidAuthHeader(t *testing.T) {
 	mockAuthService := mock_service.NewMockAuthorization(ctrl)
 
 	// Настраиваем ожидаемое поведение мок-сервиса
-	mockAuthService.EXPECT().ParseToken("invalid_token").Return("", errors.New("invalid_token"))
+	mockAuthService.EXPECT().ParseToken("invalid_token").Return(1, "", errors.New("invalid_token"))
 
 	handler := &Handler{
 		services: &service.Service{
@@ -107,7 +109,7 @@ func TestHandler_userIdentity_AdminRole(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockAuthService := mock_service.NewMockAuthorization(ctrl)
-	mockAuthService.EXPECT().ParseToken(gomock.Any()).Return("admin", nil)
+	mockAuthService.EXPECT().ParseToken(gomock.Any()).Return(1, "admin", nil)
 
 	handler := &Handler{
 		services: &service.Service{

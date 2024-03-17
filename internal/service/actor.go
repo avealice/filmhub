@@ -1,8 +1,8 @@
 package service
 
 import (
-	"filmhub/internal/model"
-	"filmhub/internal/repository"
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/repository"
 )
 
 type ActorService struct {
@@ -15,7 +15,7 @@ func NewActorService(r repository.Actor) *ActorService {
 	}
 }
 
-func (s *ActorService) CreateActor(actor model.InputActor) error {
+func (s *ActorService) CreateActor(actor model.InputActor) (int, error) {
 	return s.r.CreateActor(actor)
 }
 

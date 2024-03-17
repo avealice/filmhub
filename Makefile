@@ -1,4 +1,4 @@
-.PHONY: build test clean
+.PHONY: build run test clean
 
 APP_PATH := ./cmd/main.go
 APP_NAME := filmhub
@@ -7,7 +7,7 @@ TEST_PATH := ./internal/handler
 build:
 	docker-compose build $(APP_NAME)
 
-run:
+run: build
 	docker-compose up $(APP_NAME)
 
 test:

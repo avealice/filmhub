@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"filmhub/internal/model"
-	"filmhub/internal/service"
-	mock_service "filmhub/internal/service/mocks"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/service"
+
+	mock_service "github.com/avealice/filmhub/internal/service/mocks"
 
 	"github.com/golang/mock/gomock"
 )

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/model"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -23,7 +23,7 @@ type Movie interface {
 
 type Actor interface {
 	GetAllActors() ([]model.ActorWithMovies, error)
-	CreateActor(actor model.InputActor) error
+	CreateActor(actor model.InputActor) (int, error)
 	Delete(actorID int) error
 	Get(actorID int) (model.ActorWithMovies, error)
 	Update(actorID int, data model.InputActor) error

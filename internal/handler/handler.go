@@ -1,9 +1,10 @@
 package handler
 
 import (
-	_ "filmhub/docs"
-	"filmhub/internal/service"
 	"net/http"
+
+	_ "github.com/avealice/filmhub/docs"
+	"github.com/avealice/filmhub/internal/service"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 )

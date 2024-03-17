@@ -3,10 +3,11 @@ package service
 import (
 	"crypto/sha1"
 	"errors"
-	"filmhub/internal/model"
-	"filmhub/internal/repository"
 	"fmt"
 	"time"
+
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/repository"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -19,7 +20,8 @@ const (
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	Role string `json:"role"`
+	Role   string `json:"role"`
+	UserID int    `json:"user_id"`
 }
 
 type AuthService struct {
@@ -48,7 +50,8 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		Role: user.Role,
+		Role:   user.Role,
+		UserID: user.ID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -63,7 +66,7 @@ func generatePasswordHash(password string) string {
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
-func (s *AuthService) ParseToken(accessToken string) (string, error) {
+func (s *AuthService) ParseToken(accessToken string) (int, string, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
@@ -73,13 +76,13 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return -1, "", err
 	}
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return "", errors.New("token claims are not of type *tokenClaims")
+		return -1, "", errors.New("token claims are not of type *tokenClaims")
 	}
 
-	return claims.Role, nil
+	return claims.UserID, claims.Role, nil
 }

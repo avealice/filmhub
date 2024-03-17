@@ -1,8 +1,8 @@
 package service
 
 import (
-	"filmhub/internal/model"
-	"filmhub/internal/repository"
+	"github.com/avealice/filmhub/internal/model"
+	"github.com/avealice/filmhub/internal/repository"
 )
 
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
@@ -10,7 +10,7 @@ import (
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
 	GenerateToken(username, password string) (string, error)
-	ParseToken(token string) (string, error)
+	ParseToken(token string) (int, string, error)
 }
 
 type Movie interface {
@@ -24,7 +24,7 @@ type Movie interface {
 }
 
 type Actor interface {
-	CreateActor(actor model.InputActor) error
+	CreateActor(actor model.InputActor) (int, error)
 	GetAllActors() ([]model.ActorWithMovies, error)
 	Delete(actorID int) error
 	Get(actorID int) (model.ActorWithMovies, error)
