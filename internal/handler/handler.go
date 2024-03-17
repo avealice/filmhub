@@ -5,7 +5,7 @@ import (
 	"filmhub/internal/service"
 	"net/http"
 
-	httpSwagger "filmhub/httpswagger"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Handler struct {
@@ -21,7 +21,6 @@ func (h *Handler) InitRoutes() http.Handler {
 
 	mux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
-			// Обработка запросов OPTIONS
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")

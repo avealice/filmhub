@@ -13,20 +13,20 @@ type Authorization interface {
 
 type Movie interface {
 	GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error)
-	CreateMovie(movie model.MovieWithActors) error
+	CreateMovie(movie model.InputMovie) error
 	GetMovieByID(movieID int) (model.MovieWithActors, error)
 	DeleteByID(movieID int) error
-	UpdateMovie(movieID int, data model.MovieWithActors) error
+	UpdateMovie(movieID int, data model.InputMovie) error
 	GetMoviesByTitle(title string) ([]model.MovieWithActors, error)
 	GetMoviesByActor(actor string) ([]model.MovieWithActors, error)
 }
 
 type Actor interface {
 	GetAllActors() ([]model.ActorWithMovies, error)
-	CreateActor(actor model.Actor) error
+	CreateActor(actor model.InputActor) error
 	Delete(actorID int) error
 	Get(actorID int) (model.ActorWithMovies, error)
-	Update(actorID int, data model.ActorWithMovies) error
+	Update(actorID int, data model.InputActor) error
 }
 
 type Repository struct {

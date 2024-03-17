@@ -2,15 +2,16 @@
 
 APP_PATH := ./cmd/main.go
 APP_NAME := filmhub
+TEST_PATH := ./internal/handler
 
 build:
-	go build -o $(APP_NAME) $(APP_PATH)
+	docker-compose build $(APP_NAME)
 
-run: build
-	go run $(APP_PATH)
+run:
+	docker-compose up $(APP_NAME)
 
 test:
-	go test -cover -v ./internal/handler
+	go test -cover -v $(TEST_PATH)
 
 clean:
 	rm -f $(APP_NAME)

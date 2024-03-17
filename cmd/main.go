@@ -18,7 +18,6 @@ import (
 // @securityDefinitions.apiKey ApiKeyAuth
 // @in header
 // @name Authorization
-// @BearerFormat Bearer
 func main() {
 	a := app.NewApp()
 	a.Run()

@@ -12,6 +12,10 @@ type SignInInput struct {
 	Password string `json:"password"`
 }
 
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
 // signIn авторизует пользователя и возвращает токен доступа.
 //
 // @Summary Авторизация пользователя
@@ -20,7 +24,7 @@ type SignInInput struct {
 // @Accept json
 // @Produce json
 // @Param request body SignInInput true "Данные для входа"
-// @Success 200 {object} map[string]interface{} "map[token]: Токен доступа"
+// @Success 200 {object} TokenResponse "Токен доступа"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /auth/sign-in [post]
@@ -42,11 +46,16 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]interface{}{"token": token}
+	response := TokenResponse{Token: token}
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+}
+
+type UserIDResponse struct {
+	ID int `json:"id"`
 }
 
 // signUp регистрирует нового пользователя.
@@ -57,7 +66,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param request body model.User true "Данные нового пользователя"
-// @Success 201 {object} map[string]interface{} "map[id]: ID нового пользователя"
+// @Success 201 {object} UserIDResponse "ID нового пользователя"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /auth/sign-up [post]
@@ -79,7 +88,8 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]interface{}{"id": id}
+	response := UserIDResponse{ID: id}
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		newErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return

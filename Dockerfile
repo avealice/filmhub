@@ -1,14 +1,11 @@
 FROM golang:latest
 
-WORKDIR /app
+RUN go version
+ENV GOPATH=/
 
-COPY . .
-
-WORKDIR /app/cmd
+COPY ./ ./
 
 RUN go mod download
-RUN go build -o main .
+RUN go build -o filmhub ./cmd/main.go
 
-EXPOSE 8080
-
-CMD ["./main"]
+CMD ["./filmhub"]

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"filmhub/internal/model"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 // @Tags /api/actors
 // @Produce json
 // @Success 200 {array} model.ActorWithMovies
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actors [get]
@@ -42,8 +44,9 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 // @Tags /api/actor
 // @Accept json
 // @Produce json
-// @Param actor body model.Actor true "Данные нового актера"
+// @Param actor body model.InputActor true "Данные нового актера"
 // @Success 201 {string} string "Актер успешно создан"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor [post]
@@ -60,7 +63,7 @@ func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input model.Actor
+	var input model.InputActor
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -84,6 +87,7 @@ func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Идентификатор актера"
 // @Success 200 {string} string "Актер успешно удален"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [delete]
@@ -132,9 +136,10 @@ func (h *Handler) deleteActor(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Идентификатор актера"
-// @Param actor body model.ActorWithMovies true "Новые данные актера"
+// @Param actor body model.InputActor true "Новые данные актера"
 // @Success 200 {string} string "Информация об актере успешно обновлена"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [put]
@@ -165,7 +170,7 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input model.ActorWithMovies
+	var input model.InputActor
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -173,6 +178,7 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Actor.Update(actodID, input)
 	if err != nil {
+		fmt.Println(err.Error())
 		newErrorResponse(w, http.StatusInternalServerError, "Failed to update actor")
 		return
 	}
@@ -190,6 +196,7 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Идентификатор актера"
 // @Success 200 {object} model.ActorWithMovies
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor/{id} [get]

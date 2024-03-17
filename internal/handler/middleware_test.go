@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"filmhub/internal/service"
 	mock_service "filmhub/internal/service/mocks"
 	"net/http"
@@ -70,12 +71,14 @@ func TestHandler_userIdentity_AuthHeaderMissing(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusUnauthorized, w.Code)
 	}
 }
-
 func TestHandler_userIdentity_InvalidAuthHeader(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockAuthService := mock_service.NewMockAuthorization(ctrl)
+
+	// Настраиваем ожидаемое поведение мок-сервиса
+	mockAuthService.EXPECT().ParseToken("invalid_token").Return("", errors.New("invalid_token"))
 
 	handler := &Handler{
 		services: &service.Service{

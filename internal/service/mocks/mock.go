@@ -117,7 +117,7 @@ func (mr *MockMovieMockRecorder) GetAllMovies(sortBy, sortOrder interface{}) *go
 }
 
 // CreateMovie mocks base method
-func (m *MockMovie) CreateMovie(movie model.MovieWithActors) error {
+func (m *MockMovie) CreateMovie(movie model.InputMovie) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateMovie", movie)
 	ret0, _ := ret[0].(error)
@@ -160,7 +160,7 @@ func (mr *MockMovieMockRecorder) DeleteByID(movieID interface{}) *gomock.Call {
 }
 
 // UpdateMovie mocks base method
-func (m *MockMovie) UpdateMovie(movieID int, data model.MovieWithActors) error {
+func (m *MockMovie) UpdateMovie(movieID int, data model.InputMovie) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateMovie", movieID, data)
 	ret0, _ := ret[0].(error)
@@ -227,7 +227,7 @@ func (m *MockActor) EXPECT() *MockActorMockRecorder {
 }
 
 // CreateActor mocks base method
-func (m *MockActor) CreateActor(actor model.Actor) error {
+func (m *MockActor) CreateActor(actor model.InputActor) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateActor", actor)
 	ret0, _ := ret[0].(error)
@@ -285,7 +285,7 @@ func (mr *MockActorMockRecorder) Get(actorID interface{}) *gomock.Call {
 }
 
 // Update mocks base method
-func (m *MockActor) Update(actorID int, data model.ActorWithMovies) error {
+func (m *MockActor) Update(actorID int, data model.InputActor) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", actorID, data)
 	ret0, _ := ret[0].(error)
@@ -296,4 +296,18 @@ func (m *MockActor) Update(actorID int, data model.ActorWithMovies) error {
 func (mr *MockActorMockRecorder) Update(actorID, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockActor)(nil).Update), actorID, data)
+}
+
+// AddActorToMovie mocks base method
+func (m *MockActor) AddActorToMovie(actorID, movieID int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddActorToMovie", actorID, movieID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddActorToMovie indicates an expected call of AddActorToMovie
+func (mr *MockActorMockRecorder) AddActorToMovie(actorID, movieID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddActorToMovie", reflect.TypeOf((*MockActor)(nil).AddActorToMovie), actorID, movieID)
 }

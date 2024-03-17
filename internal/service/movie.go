@@ -19,7 +19,7 @@ func (s *MovieService) GetAllMovies(sortBy, sortOrder string) ([]model.Movie, er
 	return s.r.GetAllMovies(sortBy, sortOrder)
 }
 
-func (s *MovieService) CreateMovie(movie model.MovieWithActors) error {
+func (s *MovieService) CreateMovie(movie model.InputMovie) error {
 	return s.r.CreateMovie(movie)
 }
 
@@ -31,7 +31,7 @@ func (s *MovieService) DeleteByID(movieID int) error {
 	return s.r.DeleteByID(movieID)
 }
 
-func (s *MovieService) UpdateMovie(movieID int, data model.MovieWithActors) error {
+func (s *MovieService) UpdateMovie(movieID int, data model.InputMovie) error {
 	return s.r.UpdateMovie(movieID, data)
 }
 

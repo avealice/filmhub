@@ -13,10 +13,11 @@ import (
 // @Description Получает список всех фильмов с возможностью сортировки.
 // @Tags /api/movies
 // @Produce json
-// @Param sort_by query string false "Критерий сортировки (например, 'rating')"
-// @Param sort_order query string false "Порядок сортировки (например, 'asc' или 'desc')"
+// @Param sort_by query string false "Критерий сортировки (title, rating, release_date)"
+// @Param sort_order query string false "Порядок сортировки (asc, desc)"
 // @Success 200 {array} model.Movie "Список фильмов"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/movies [get]
@@ -54,9 +55,10 @@ func (h *Handler) getAllMovies(w http.ResponseWriter, r *http.Request) {
 // @Tags /api/movie
 // @Accept json
 // @Produce json
-// @Param movie body model.MovieWithActors true "Данные нового фильма"
+// @Param movie body model.InputMovie true "Данные нового фильма"
 // @Success 201 "Фильм создан успешно"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/movie [post]
@@ -73,7 +75,7 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input model.MovieWithActors
+	var input model.InputMovie
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -96,6 +98,7 @@ func (h *Handler) createMovie(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Идентификатор фильма"
 // @Success 200 "Фильм удален успешно"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
@@ -146,6 +149,7 @@ func (h *Handler) deleteMovie(w http.ResponseWriter, r *http.Request) {
 // @Param actor query string false "Имя актера для поиска"
 // @Success 200 {array} model.MovieWithActors "Список фильмов, удовлетворяющих критериям поиска"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/movie/search [get]
@@ -189,9 +193,10 @@ func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Идентификатор фильма"
-// @Param movie body model.MovieWithActors true "Новые данные о фильме"
+// @Param movie body model.InputMovie true "Новые данные о фильме"
 // @Success 200 "Фильм обновлен успешно"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
@@ -223,7 +228,7 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input model.MovieWithActors
+	var input model.InputMovie
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		newErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -247,6 +252,7 @@ func (h *Handler) updateMovie(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Идентификатор фильма"
 // @Success 200 {object} model.MovieWithActors "Информация о фильме"
 // @Failure 400 {object} ErrorResponse "Некорректный запрос или данные"
+// @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
 // @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"

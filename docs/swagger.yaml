@@ -13,6 +13,16 @@ definitions:
       username:
         type: string
     type: object
+  handler.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  handler.UserIDResponse:
+    properties:
+      id:
+        type: integer
+    type: object
   model.Actor:
     properties:
       birth_date:
@@ -21,11 +31,34 @@ definitions:
       gender:
         description: Gender of the actor
         type: string
+      id:
+        description: Unique identifier for the actor
+        type: integer
       name:
         description: Name of the actor
         type: string
     type: object
   model.ActorWithMovies:
+    properties:
+      birth_date:
+        description: Birth date of the actor
+        type: string
+      gender:
+        description: Gender of the actor
+        type: string
+      id:
+        description: Unique identifier for the actor
+        type: integer
+      movies:
+        description: Movies associated with the actor
+        items:
+          $ref: '#/definitions/model.Movie'
+        type: array
+      name:
+        description: Name of the actor
+        type: string
+    type: object
+  model.InputActor:
     properties:
       birth_date:
         description: Birth date of the actor
@@ -42,11 +75,34 @@ definitions:
         description: Name of the actor
         type: string
     type: object
+  model.InputMovie:
+    properties:
+      actors:
+        description: Actors associated with the movie
+        items:
+          $ref: '#/definitions/model.Actor'
+        type: array
+      description:
+        description: Description of the movie
+        type: string
+      rating:
+        description: Rating of the movie
+        type: integer
+      release_date:
+        description: Release date of the movie
+        type: string
+      title:
+        description: Title of the movie
+        type: string
+    type: object
   model.Movie:
     properties:
       description:
         description: Description of the movie
         type: string
+      id:
+        description: Unique identifier for the movie
+        type: integer
       rating:
         description: Rating of the movie
         type: integer
@@ -67,6 +123,9 @@ definitions:
       description:
         description: Description of the movie
         type: string
+      id:
+        description: Unique identifier for the movie
+        type: integer
       rating:
         description: Rating of the movie
         type: integer
@@ -105,7 +164,7 @@ paths:
         name: actor
         required: true
         schema:
-          $ref: '#/definitions/model.Actor'
+          $ref: '#/definitions/model.InputActor'
       produces:
       - application/json
       responses:
@@ -113,6 +172,10 @@ paths:
           description: Актер успешно создан
           schema:
             type: string
+        "401":
+          description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "405":
           description: Некорректный метод
           schema:
@@ -142,6 +205,10 @@ paths:
             type: string
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "403":
@@ -176,6 +243,10 @@ paths:
           description: Некорректный запрос или данные
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "405":
           description: Некорректный метод
           schema:
@@ -204,7 +275,7 @@ paths:
         name: actor
         required: true
         schema:
-          $ref: '#/definitions/model.ActorWithMovies'
+          $ref: '#/definitions/model.InputActor'
       produces:
       - application/json
       responses:
@@ -214,6 +285,10 @@ paths:
             type: string
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "403":
@@ -241,6 +316,10 @@ paths:
             items:
               $ref: '#/definitions/model.ActorWithMovies'
             type: array
+        "401":
+          description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "405":
           description: Некорректный метод
           schema:
@@ -265,7 +344,7 @@ paths:
         name: movie
         required: true
         schema:
-          $ref: '#/definitions/model.MovieWithActors'
+          $ref: '#/definitions/model.InputMovie'
       produces:
       - application/json
       responses:
@@ -273,6 +352,10 @@ paths:
           description: Фильм создан успешно
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "403":
@@ -302,6 +385,10 @@ paths:
           description: Фильм удален успешно
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "403":
@@ -340,6 +427,10 @@ paths:
           description: Некорректный запрос или данные
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "403":
           description: Некорректная роль
           schema:
@@ -372,7 +463,7 @@ paths:
         name: movie
         required: true
         schema:
-          $ref: '#/definitions/model.MovieWithActors'
+          $ref: '#/definitions/model.InputMovie'
       produces:
       - application/json
       responses:
@@ -380,6 +471,10 @@ paths:
           description: Фильм обновлен успешно
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "403":
@@ -424,6 +519,10 @@ paths:
           description: Некорректный запрос или данные
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "403":
           description: Некорректная роль
           schema:
@@ -441,11 +540,11 @@ paths:
     get:
       description: Получает список всех фильмов с возможностью сортировки.
       parameters:
-      - description: Критерий сортировки (например, 'rating')
+      - description: Критерий сортировки (title, rating, release_date)
         in: query
         name: sort_by
         type: string
-      - description: Порядок сортировки (например, 'asc' или 'desc')
+      - description: Порядок сортировки (asc, desc)
         in: query
         name: sort_order
         type: string
@@ -460,6 +559,10 @@ paths:
             type: array
         "400":
           description: Некорректный запрос или данные
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Пустой заголовок авторизации
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "405":
@@ -492,10 +595,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'map[token]: Токен доступа'
+          description: Токен доступа
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/handler.TokenResponse'
         "400":
           description: Некорректный запрос или данные
           schema:
@@ -523,10 +625,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: 'map[id]: ID нового пользователя'
+          description: ID нового пользователя
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/handler.UserIDResponse'
         "400":
           description: Некорректный запрос или данные
           schema:

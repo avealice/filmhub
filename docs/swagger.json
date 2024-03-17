@@ -35,7 +35,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Actor"
+                            "$ref": "#/definitions/model.InputActor"
                         }
                     }
                 ],
@@ -44,6 +44,12 @@
                         "description": "Актер успешно создан",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "405": {
@@ -98,6 +104,12 @@
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "405": {
                         "description": "Некорректный метод",
                         "schema": {
@@ -143,7 +155,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.ActorWithMovies"
+                            "$ref": "#/definitions/model.InputActor"
                         }
                     }
                 ],
@@ -156,6 +168,12 @@
                     },
                     "400": {
                         "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -207,6 +225,12 @@
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "403": {
                         "description": "Некорректная роль",
                         "schema": {
@@ -245,6 +269,12 @@
                             "items": {
                                 "$ref": "#/definitions/model.ActorWithMovies"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "405": {
@@ -287,7 +317,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.MovieWithActors"
+                            "$ref": "#/definitions/model.InputMovie"
                         }
                     }
                 ],
@@ -297,6 +327,12 @@
                     },
                     "400": {
                         "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -361,6 +397,12 @@
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "403": {
                         "description": "Некорректная роль",
                         "schema": {
@@ -409,6 +451,12 @@
                     },
                     "400": {
                         "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -464,7 +512,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.MovieWithActors"
+                            "$ref": "#/definitions/model.InputMovie"
                         }
                     }
                 ],
@@ -474,6 +522,12 @@
                     },
                     "400": {
                         "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -528,6 +582,12 @@
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "403": {
                         "description": "Некорректная роль",
                         "schema": {
@@ -567,13 +627,13 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Критерий сортировки (например, 'rating')",
+                        "description": "Критерий сортировки (title, rating, release_date)",
                         "name": "sort_by",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Порядок сортировки (например, 'asc' или 'desc')",
+                        "description": "Порядок сортировки (asc, desc)",
                         "name": "sort_order",
                         "in": "query"
                     }
@@ -590,6 +650,12 @@
                     },
                     "400": {
                         "description": "Некорректный запрос или данные",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пустой заголовок авторизации",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -635,10 +701,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "map[token]: Токен доступа",
+                        "description": "Токен доступа",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handler.TokenResponse"
                         }
                     },
                     "400": {
@@ -682,10 +747,9 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "map[id]: ID нового пользователя",
+                        "description": "ID нового пользователя",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handler.UserIDResponse"
                         }
                     },
                     "400": {
@@ -725,6 +789,22 @@
                 }
             }
         },
+        "handler.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.UserIDResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.Actor": {
             "type": "object",
             "properties": {
@@ -736,6 +816,10 @@
                     "description": "Gender of the actor",
                     "type": "string"
                 },
+                "id": {
+                    "description": "Unique identifier for the actor",
+                    "type": "integer"
+                },
                 "name": {
                     "description": "Name of the actor",
                     "type": "string"
@@ -743,6 +827,34 @@
             }
         },
         "model.ActorWithMovies": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "description": "Birth date of the actor",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "Gender of the actor",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the actor",
+                    "type": "integer"
+                },
+                "movies": {
+                    "description": "Movies associated with the actor",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Movie"
+                    }
+                },
+                "name": {
+                    "description": "Name of the actor",
+                    "type": "string"
+                }
+            }
+        },
+        "model.InputActor": {
             "type": "object",
             "properties": {
                 "birth_date": {
@@ -766,12 +878,44 @@
                 }
             }
         },
+        "model.InputMovie": {
+            "type": "object",
+            "properties": {
+                "actors": {
+                    "description": "Actors associated with the movie",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Actor"
+                    }
+                },
+                "description": {
+                    "description": "Description of the movie",
+                    "type": "string"
+                },
+                "rating": {
+                    "description": "Rating of the movie",
+                    "type": "integer"
+                },
+                "release_date": {
+                    "description": "Release date of the movie",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title of the movie",
+                    "type": "string"
+                }
+            }
+        },
         "model.Movie": {
             "type": "object",
             "properties": {
                 "description": {
                     "description": "Description of the movie",
                     "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the movie",
+                    "type": "integer"
                 },
                 "rating": {
                     "description": "Rating of the movie",
@@ -800,6 +944,10 @@
                 "description": {
                     "description": "Description of the movie",
                     "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the movie",
+                    "type": "integer"
                 },
                 "rating": {
                     "description": "Rating of the movie",

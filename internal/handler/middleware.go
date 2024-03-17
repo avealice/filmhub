@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -29,12 +28,6 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 			return
 		}
 
-		// headerParts := strings.Split(header, " ")
-		// if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		// 	http.Error(w, "invalid auth header", http.StatusUnauthorized)
-		// 	return
-		// }
-		fmt.Println(header)
 		var token string
 		headerParts := strings.Split(header, " ")
 		if len(headerParts) > 2 || len(headerParts) == 0 {

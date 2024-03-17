@@ -15,7 +15,7 @@ func NewActorService(r repository.Actor) *ActorService {
 	}
 }
 
-func (s *ActorService) CreateActor(actor model.Actor) error {
+func (s *ActorService) CreateActor(actor model.InputActor) error {
 	return s.r.CreateActor(actor)
 }
 
@@ -31,6 +31,6 @@ func (s *ActorService) Get(actorID int) (model.ActorWithMovies, error) {
 	return s.r.Get(actorID)
 }
 
-func (s *ActorService) Update(actorID int, data model.ActorWithMovies) error {
+func (s *ActorService) Update(actorID int, data model.InputActor) error {
 	return s.r.Update(actorID, data)
 }
