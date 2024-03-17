@@ -2,14 +2,14 @@ CREATE TABLE IF NOT EXISTS actor (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     gender VARCHAR(6) CHECK (gender IN ('male', 'female', 'other')) NOT NULL,
-    birth_date DATE NOT NULL
+    birth_date DATE CHECK (birth_date <= CURRENT_DATE) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS movie (
     id SERIAL PRIMARY KEY,
     title VARCHAR(150) CHECK (LENGTH(title) >= 1 AND LENGTH(title) <= 150) NOT NULL,
     description TEXT CHECK (LENGTH(description) <= 1000),
-    release_date DATE CHECK (release_date >= '1900-01-01') NOT NULL,
+    release_date DATE CHECK (release_date >= '1900-01-01' AND release_date <= '2050-12-31') NOT NULL,
     rating INT CHECK (rating >= 0 AND rating <= 10) NOT NULL
 );
 

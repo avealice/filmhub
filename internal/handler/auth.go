@@ -38,13 +38,13 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	var input SignInInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		newErrorResponse(w, http.StatusBadRequest, err.Error())
+		newErrorResponse(w, http.StatusBadRequest, errors.New("Invalid input").Error())
 		return
 	}
 
 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, err.Error())
+		newErrorResponse(w, http.StatusInternalServerError, errors.New("User signin in unsuccessfully").Error())
 		return
 	}
 
@@ -88,9 +88,14 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(input.Password) == 0 || len(input.Username) == 0 {
+		newErrorResponse(w, http.StatusBadRequest, errors.New("Invalid input").Error())
+		return
+	}
+
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, err.Error())
+		newErrorResponse(w, http.StatusInternalServerError, errors.New("User signed up unsuccessfully").Error())
 		return
 	}
 

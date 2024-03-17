@@ -26,10 +26,10 @@ definitions:
   model.Actor:
     properties:
       birth_date:
-        description: Birth date of the actor
+        description: 'Format: "YYYY-M-D".'
         type: string
       gender:
-        description: Gender of the actor
+        description: 'Valid values: "male", "female", "other".'
         type: string
       name:
         description: Name of the actor
@@ -38,10 +38,10 @@ definitions:
   model.ActorWithMovies:
     properties:
       birth_date:
-        description: Birth date of the actor
+        description: 'Format: "YYYY-M-D".'
         type: string
       gender:
-        description: Gender of the actor
+        description: 'Valid values: "male", "female", "other".'
         type: string
       id:
         description: Unique identifier for the actor
@@ -58,10 +58,10 @@ definitions:
   model.InputActor:
     properties:
       birth_date:
-        description: Birth date of the actor
+        description: 'Format: "YYYY-M-D".'
         type: string
       gender:
-        description: Gender of the actor
+        description: 'Valid values: "male", "female", "other".'
         type: string
       movies:
         description: Movies associated with the actor
@@ -86,7 +86,7 @@ definitions:
         description: Rating of the movie
         type: integer
       release_date:
-        description: Release date of the movie
+        description: 'Format: "YYYY-M-D".'
         type: string
       title:
         description: Title of the movie
@@ -101,7 +101,7 @@ definitions:
         description: Rating of the movie
         type: integer
       release_date:
-        description: Release date of the movie
+        description: 'Format: "YYYY-M-D".'
         type: string
       title:
         description: Title of the movie
@@ -124,7 +124,7 @@ definitions:
         description: Rating of the movie
         type: integer
       release_date:
-        description: Release date of the movie
+        description: 'Format: "YYYY-M-D".'
         type: string
       title:
         description: Title of the movie

@@ -816,11 +816,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "birth_date": {
-                    "description": "Birth date of the actor",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "gender": {
-                    "description": "Gender of the actor",
+                    "description": "Valid values: \"male\", \"female\", \"other\".",
                     "type": "string"
                 },
                 "name": {
@@ -833,11 +833,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "birth_date": {
-                    "description": "Birth date of the actor",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "gender": {
-                    "description": "Gender of the actor",
+                    "description": "Valid values: \"male\", \"female\", \"other\".",
                     "type": "string"
                 },
                 "id": {
@@ -861,11 +861,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "birth_date": {
-                    "description": "Birth date of the actor",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "gender": {
-                    "description": "Gender of the actor",
+                    "description": "Valid values: \"male\", \"female\", \"other\".",
                     "type": "string"
                 },
                 "movies": {
@@ -900,7 +900,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "release_date": {
-                    "description": "Release date of the movie",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "title": {
@@ -921,7 +921,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "release_date": {
-                    "description": "Release date of the movie",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "title": {
@@ -953,7 +953,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "release_date": {
-                    "description": "Release date of the movie",
+                    "description": "Format: \"YYYY-M-D\".",
                     "type": "string"
                 },
                 "title": {

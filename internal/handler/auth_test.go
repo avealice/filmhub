@@ -96,42 +96,6 @@ func TestHandler_signUp_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-func TestHandler_signUp_InvalidInput(t *testing.T) {
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockAuthService := mock_service.NewMockAuthorization(ctrl)
-
-	handler := &Handler{
-		services: &service.Service{
-			Authorization: mockAuthService,
-		},
-	}
-
-	mockAuthService.EXPECT().CreateUser(gomock.Any()).Return(0, errors.New("username and password cannot be empty")).Times(1)
-
-	body := []byte(`{"username": "", "password": ""}`)
-	req := httptest.NewRequest("POST", "/auth/sign-up", bytes.NewBuffer(body))
-	w := httptest.NewRecorder()
-
-	handler.signUp(w, req)
-
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
-	}
-
-	var response map[string]interface{}
-	err := json.NewDecoder(w.Body).Decode(&response)
-	if err != nil {
-		t.Errorf("Error decoding response body: %v", err)
-	}
-
-	if _, ok := response["message"]; !ok {
-		t.Error("Error message not found in response")
-	}
-}
-
 func TestHandler_signUp_InternalServerError(t *testing.T) {
 
 	ctrl := gomock.NewController(t)

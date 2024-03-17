@@ -165,7 +165,7 @@ func TestHandler_CreateActor_Unsuccessful(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 
-	expectedResponse := "{\"message\":\"Failed to create actor\"}"
+	expectedResponse := "{\"message\":\"Actor created unsuccessfully\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
 	}
@@ -207,7 +207,7 @@ func TestHandler_CreateActor_BadRequest(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
 	}
 
-	expectedResponse := "{\"message\":\"invalid character 'i' looking for beginning of value\"}"
+	expectedResponse := "{\"message\":\"Invalid input\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
 	}

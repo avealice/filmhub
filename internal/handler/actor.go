@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -74,13 +75,13 @@ func (h *Handler) CreateActor(w http.ResponseWriter, r *http.Request) {
 
 	var input model.InputActor
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		newErrorResponse(w, http.StatusBadRequest, err.Error())
+		newErrorResponse(w, http.StatusBadRequest, errors.New("Invalid input").Error())
 		return
 	}
 
 	actorID, err := h.services.Actor.CreateActor(input)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, err.Error())
+		newErrorResponse(w, http.StatusInternalServerError, errors.New("Actor created unsuccessfully").Error())
 		return
 	}
 
@@ -199,7 +200,7 @@ func (h *Handler) updateActor(w http.ResponseWriter, r *http.Request) {
 
 	var input model.InputActor
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		newErrorResponse(w, http.StatusBadRequest, err.Error())
+		newErrorResponse(w, http.StatusBadRequest, errors.New("Invalid input").Error())
 		return
 	}
 
@@ -254,7 +255,7 @@ func (h *Handler) getActor(w http.ResponseWriter, r *http.Request) {
 
 	actor, err := h.services.Actor.Get(actorID)
 	if err != nil {
-		newErrorResponse(w, http.StatusInternalServerError, err.Error())
+		newErrorResponse(w, http.StatusInternalServerError, errors.New("Failed to get actor").Error())
 		return
 	}
 
