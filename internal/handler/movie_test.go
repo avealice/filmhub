@@ -32,7 +32,7 @@ func TestHandler_getAllMovies_NoSorting(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/movies", nil)
 	w := httptest.NewRecorder()
 
-	expectedMovies := []model.Movie{
+	expectedMovies := []model.MovieWithActors{
 		{ID: 1, Title: "Movie 1", Description: "Description 1", ReleaseDate: "2022-01-01", Rating: 85},
 		{ID: 2, Title: "Movie 2", Description: "Description 2", ReleaseDate: "2022-01-02", Rating: 79},
 	}
