@@ -21,28 +21,6 @@ func NewActorPostgres(db *sqlx.DB) *ActorPostgres {
 	}
 }
 
-// func (r *ActorPostgres) CreateActor(actor model.InputActor) (int, error) {
-// 	var existingActorID int
-// 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = $1 AND gender = $2 AND birth_date = $3", actorsTable)
-// 	err := r.db.QueryRow(query, actor.Name, actor.Gender, actor.BirthDate).Scan(&existingActorID)
-// 	if err != nil && err != sql.ErrNoRows {
-// 		return 0, err
-// 	}
-
-// 	if err == nil {
-// 		return 0, errors.New("actor with the same name, gender, and birth date already exists")
-// 	}
-
-// 	insertQuery := fmt.Sprintf("INSERT INTO %s (name, gender, birth_date) VALUES ($1, $2, $3) RETURNING id", actorsTable)
-// 	var insertedID int
-// 	err = r.db.QueryRow(insertQuery, actor.Name, actor.Gender, actor.BirthDate).Scan(&insertedID)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	return insertedID, nil
-// }
-
 func (r *ActorPostgres) CreateActor(actor model.InputActor) (int, error) {
 	var existingActorID int
 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = $1 AND gender = $2 AND birth_date = $3", actorsTable)
@@ -95,7 +73,7 @@ func (r *ActorPostgres) GetAllActors() ([]model.ActorWithMovies, error) {
 	var actorsWithMovies []model.ActorWithMovies
 
 	query := fmt.Sprintf(`
-		SELECT a.id, a.name, a.gender, a.birth_date,
+		SELECT a.id, a.name, a.gender, TO_CHAR(a.birth_date, 'YYYY-MM-DD') AS actor_birth_date,
 			   m.id AS movie_id, m.title AS movie_title, m.description AS movie_description,
 			   TO_CHAR(m.release_date, 'YYYY-MM-DD') AS movie_release_date, m.rating AS movie_rating
 		FROM %s a
@@ -115,9 +93,9 @@ func (r *ActorPostgres) GetAllActors() ([]model.ActorWithMovies, error) {
 		var actorID int
 		var actor model.Actor
 		var movie model.Movie
-		var releaseDateStr string
+		var actorBirthDateStr, releaseDateStr string
 
-		rows.Scan(&actorID, &actor.Name, &actor.Gender, &actor.BirthDate,
+		rows.Scan(&actorID, &actor.Name, &actor.Gender, &actorBirthDateStr,
 			&movie.ID, &movie.Title, &movie.Description, &releaseDateStr, &movie.Rating)
 
 		actorWithMovies, ok := actorMap[actorID]
@@ -126,7 +104,7 @@ func (r *ActorPostgres) GetAllActors() ([]model.ActorWithMovies, error) {
 				ID:        actorID,
 				Name:      actor.Name,
 				Gender:    actor.Gender,
-				BirthDate: actor.BirthDate,
+				BirthDate: actorBirthDateStr,
 				Movies:    []model.Movie{},
 			}
 		}
@@ -162,11 +140,12 @@ func (r *ActorPostgres) Delete(actorID int) error {
 	}
 	return nil
 }
+
 func (r *ActorPostgres) Get(actorID int) (model.ActorWithMovies, error) {
 	var actor model.ActorWithMovies
 
 	query := fmt.Sprintf(`
-        SELECT a.id, a.name, a.gender, a.birth_date, m.id, m.title, m.description, TO_CHAR(m.release_date, 'YYYY-MM-DD'), m.rating
+        SELECT a.id, a.name, a.gender, TO_CHAR(a.birth_date, 'YYYY-MM-DD'), m.id, m.title, m.description, TO_CHAR(m.release_date, 'YYYY-MM-DD'), m.rating
         FROM %s a
         LEFT JOIN %s ma ON a.id = ma.actor_id
         LEFT JOIN %s m ON ma.movie_id = m.id
@@ -185,9 +164,11 @@ func (r *ActorPostgres) Get(actorID int) (model.ActorWithMovies, error) {
 		actorFound = true
 		var movie model.Movie
 		var movieID int
+		var actorBirthDateStr string
 		var releaseDateStr string
 
-		err := rows.Scan(&actor.ID, &actor.Name, &actor.Gender, &actor.BirthDate, &movieID, &movie.Title, &movie.Description, &releaseDateStr, &movie.Rating)
+		err := rows.Scan(&actor.ID, &actor.Name, &actor.Gender, &actorBirthDateStr, &movieID, &movie.Title, &movie.Description, &releaseDateStr, &movie.Rating)
+		actor.BirthDate = actorBirthDateStr
 		if err != nil {
 			continue
 		}
@@ -205,6 +186,12 @@ func (r *ActorPostgres) Get(actorID int) (model.ActorWithMovies, error) {
 }
 
 func (r *ActorPostgres) Update(actorID int, data model.InputActor) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
 	var query strings.Builder
 	var params []interface{}
 
@@ -232,12 +219,22 @@ func (r *ActorPostgres) Update(actorID int, data model.InputActor) error {
 		paramIndex++
 	}
 
-	// Remove trailing comma and space
 	if query.Len() > len("UPDATE "+actorsTable+" SET ") {
+		queryString := query.String()
+		query.Reset()
+		query.WriteString(queryString[:len(queryString)-2])
 		query.WriteString(fmt.Sprintf(" WHERE id = $%d", paramIndex))
 		params = append(params, actorID)
+	}
 
-		_, err := r.db.Exec(query.String(), params...)
+	_, err = tx.Exec(query.String(), params...)
+	if err != nil {
+		return err
+	}
+
+	if len(data.Movies) == 0 {
+		deleteQuery := fmt.Sprintf("DELETE FROM %s WHERE actor_id = $1", movieActorTable)
+		_, err = tx.Exec(deleteQuery, actorID)
 		if err != nil {
 			return err
 		}
@@ -266,6 +263,11 @@ func (r *ActorPostgres) Update(actorID int, data model.InputActor) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 
 	return nil

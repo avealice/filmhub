@@ -12,7 +12,7 @@ type Authorization interface {
 }
 
 type Movie interface {
-	GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error)
+	GetAllMovies(sortBy, sortOrder string) ([]model.MovieWithActors, error)
 	CreateMovie(movie model.InputMovie) error
 	GetMovieByID(movieID int) (model.MovieWithActors, error)
 	DeleteByID(movieID int) error

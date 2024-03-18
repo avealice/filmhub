@@ -15,7 +15,7 @@ func NewMovieService(r repository.Movie) *MovieService {
 	}
 }
 
-func (s *MovieService) GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error) {
+func (s *MovieService) GetAllMovies(sortBy, sortOrder string) ([]model.MovieWithActors, error) {
 	return s.r.GetAllMovies(sortBy, sortOrder)
 }
 

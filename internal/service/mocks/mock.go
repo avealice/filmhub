@@ -103,10 +103,10 @@ func (m *MockMovie) EXPECT() *MockMovieMockRecorder {
 }
 
 // GetAllMovies mocks base method
-func (m *MockMovie) GetAllMovies(sortBy, sortOrder string) ([]model.Movie, error) {
+func (m *MockMovie) GetAllMovies(sortBy, sortOrder string) ([]model.MovieWithActors, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllMovies", sortBy, sortOrder)
-	ret0, _ := ret[0].([]model.Movie)
+	ret0, _ := ret[0].([]model.MovieWithActors)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
