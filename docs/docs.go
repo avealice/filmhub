@@ -999,7 +999,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "FilmHub API",
-	Description:      "API для работы с фильмами и актерами в FilmHub.",
+	Description:      "API для работы с фильмами и актерами в фильмотеке FilmHub. Логин и пароль от админки: admin и kek.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

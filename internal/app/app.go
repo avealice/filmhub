@@ -93,7 +93,7 @@ func (a *App) run(port string, handler http.Handler) error {
 		WriteTimeout:   10 * time.Second,
 	}
 
-	logrus.Print("Filmhub Started")
+	logrus.Printf("FilmHub started. The API web interface can be accessed at http://127.0.0.1:8000/swagger/")
 
 	if err := a.httpServer.ListenAndServe(); err != nil {
 		return err

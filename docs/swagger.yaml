@@ -144,7 +144,8 @@ info:
   contact:
     email: avanesova_alisa@mail.ru
     url: http://www.github.com/avealice
-  description: API для работы с фильмами и актерами в FilmHub.
+  description: 'API для работы с фильмами и актерами в фильмотеке FilmHub. Логин и
+    пароль от админки: admin и kek.'
   title: FilmHub API
 paths:
   /api/actor:
