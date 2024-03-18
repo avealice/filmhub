@@ -9,7 +9,7 @@ import (
 )
 
 // @title FilmHub API
-// @description API для работы с фильмами и актерами в фильмотеке FilmHub.
+// @description API для работы с фильмами и актерами в фильмотеке FilmHub. Логин и пароль от админки: admin и kek.
 
 // @contact.email avanesova_alisa@mail.ru
 // @contact.url http://www.github.com/avealice
