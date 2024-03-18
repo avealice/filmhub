@@ -57,6 +57,7 @@ func (h *Handler) getAllActors(w http.ResponseWriter, r *http.Request) {
 // @Param actor body model.InputActor true "Данные нового актера"
 // @Success 201 {string} string "Актер успешно создан"
 // @Failure 401 {object} ErrorResponse "Пустой заголовок авторизации"
+// @Failure 403 {object} ErrorResponse "Некорректная роль"
 // @Failure 405 {object} ErrorResponse "Некорректный метод"
 // @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/actor [post]

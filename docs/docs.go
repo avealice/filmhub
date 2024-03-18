@@ -10,7 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "url": "http://www.github.com/avealice"
+            "url": "http://www.github.com/avealice",
+            "email": "avanesova_alisa@mail.ru"
         },
         "version": "{{.Version}}"
     },
@@ -55,6 +56,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -992,7 +999,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "FilmHub API",
-	Description:      "API для работы с фильмами и актерами в FilmHub. login: admin, password: kek",
+	Description:      "API для работы с фильмами и актерами в FilmHub.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

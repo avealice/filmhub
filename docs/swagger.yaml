@@ -142,9 +142,9 @@ definitions:
 host: 127.0.0.1:8000
 info:
   contact:
+    email: avanesova_alisa@mail.ru
     url: http://www.github.com/avealice
-  description: 'API для работы с фильмами и актерами в FilmHub. login: admin, password:
-    kek'
+  description: API для работы с фильмами и актерами в FilmHub.
   title: FilmHub API
 paths:
   /api/actor:
@@ -168,6 +168,10 @@ paths:
             type: string
         "401":
           description: Пустой заголовок авторизации
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Некорректная роль
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "405":

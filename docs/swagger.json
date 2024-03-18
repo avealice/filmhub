@@ -1,10 +1,11 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API для работы с фильмами и актерами в FilmHub. login: admin, password: kek",
+        "description": "API для работы с фильмами и актерами в FilmHub.",
         "title": "FilmHub API",
         "contact": {
-            "url": "http://www.github.com/avealice"
+            "url": "http://www.github.com/avealice",
+            "email": "avanesova_alisa@mail.ru"
         }
     },
     "host": "127.0.0.1:8000",
@@ -48,6 +49,12 @@
                     },
                     "401": {
                         "description": "Пустой заголовок авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Некорректная роль",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }

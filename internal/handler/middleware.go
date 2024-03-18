@@ -16,9 +16,9 @@ const (
 type Middleware func(http.HandlerFunc) http.HandlerFunc
 
 // userIdentity проверяет наличие и валидность токена аутентификации в заголовке запроса.
-// Если токен корректен, устанавливает роль пользователя в контекст запроса.
+// Если токен корректен, устанавливает роль и id пользователя в контекст запроса.
 // @Summary Проверка аутентификации пользователя
-// @Description Middleware для проверки аутентификации пользователя и установки его роли в контекст запроса
+// @Description Middleware для проверки аутентификации пользователя и установки его роли и id в контекст запроса
 // @Tags Authentication
 // @Security ApiKeyAuth
 func (h *Handler) userIdentity(next http.Handler) http.Handler {

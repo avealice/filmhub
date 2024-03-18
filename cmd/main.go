@@ -9,9 +9,11 @@ import (
 )
 
 // @title FilmHub API
-// @description API для работы с фильмами и актерами в FilmHub. login: admin, password: kek
+// @description API для работы с фильмами и актерами в фильмотеке FilmHub.
 
+// @contact.email avanesova_alisa@mail.ru
 // @contact.url http://www.github.com/avealice
+// @contact.telegram @ohhalice
 
 // @host 127.0.0.1:8000
 // @BasePath /

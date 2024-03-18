@@ -99,33 +99,27 @@ func TestHandler_createMovie(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 	mockMovieService.EXPECT().CreateMovie(gomock.Any()).Return(nil)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Test Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
 	req := httptest.NewRequest("POST", "/api/movie", strings.NewReader(reqBody))
 	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.createMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "movie created successfully"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -136,33 +130,27 @@ func TestHandler_createMovie_UnsuccessfulCreation(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 	mockMovieService.EXPECT().CreateMovie(gomock.Any()).Return(errors.New("failed to create movie"))
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Test Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
 	req := httptest.NewRequest("POST", "/api/movie", strings.NewReader(reqBody))
 	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.createMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 
-	// Проверяем тело ответа
 	var response map[string]string
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
@@ -178,32 +166,26 @@ func TestHandler_createMovie_ForbiddenRole(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Test Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
 	req := httptest.NewRequest("POST", "/api/movie", strings.NewReader(reqBody))
 	ctx := context.WithValue(req.Context(), userRoleCtx, "user") // Устанавливаем роль пользователя в контексте
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.createMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusForbidden {
 		t.Errorf("Expected status code %d, got %d", http.StatusForbidden, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "only admin can create movies"
 	if !strings.Contains(w.Body.String(), expectedResponse) {
 		t.Errorf("Expected response body to contain %q, got %q", expectedResponse, w.Body.String())
@@ -214,32 +196,26 @@ func TestHandler_deleteMovie(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
-	mockMovieService.EXPECT().DeleteByID(1).Return(nil) // Ожидаем вызов DeleteByID с аргументом 1
+	mockMovieService.EXPECT().DeleteByID(1).Return(nil)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("DELETE", "/movie/1", nil)         // Используем метод DELETE
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
+	req := httptest.NewRequest("DELETE", "/movie/1", nil)
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.deleteMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "movie deleted successfully"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -250,34 +226,28 @@ func TestHandler_deleteMovie_Unsuccessful(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
-	mockMovieService.EXPECT().DeleteByID(1).Return(errors.New("Failed to delete movie by ID")) // Ожидаем вызов DeleteByID с аргументом 1 и возвращаем ошибку
+	mockMovieService.EXPECT().DeleteByID(1).Return(errors.New("Failed to delete movie by ID"))
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("DELETE", "/movie/1", nil)         // Используем метод DELETE
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
+	req := httptest.NewRequest("DELETE", "/movie/1", nil)
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.deleteMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "{\"message\":\"Failed to delete movie by ID\"}"
-	actualResponse := strings.Trim(w.Body.String(), `"`) // Убираем кавычки из ответа
+	actualResponse := strings.Trim(w.Body.String(), `"`)
 	if actualResponse != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, actualResponse)
 	}
@@ -296,7 +266,7 @@ func TestHandler_deleteMovie_NotAdmin(t *testing.T) {
 	}
 
 	req := httptest.NewRequest("DELETE", "/movie/1", nil)
-	ctx := context.WithValue(req.Context(), userRoleCtx, "user") // Устанавливаем не администратора в контексте
+	ctx := context.WithValue(req.Context(), userRoleCtx, "user")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -324,7 +294,7 @@ func TestHandler_deleteMovie_InvalidMovieID(t *testing.T) {
 		},
 	}
 
-	req := httptest.NewRequest("DELETE", "/movie/invalid_id", nil) // Используем некорректный формат идентификатора фильма
+	req := httptest.NewRequest("DELETE", "/movie/invalid_id", nil)
 	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
@@ -345,33 +315,27 @@ func TestHandler_updateMovie(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
-	mockMovieService.EXPECT().UpdateMovie(gomock.Any(), gomock.Any()).Return(nil) // Ожидаем вызов UpdateMovie с любыми аргументами и возвращаем nil
+	mockMovieService.EXPECT().UpdateMovie(gomock.Any(), gomock.Any()).Return(nil)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Updated Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
-	req := httptest.NewRequest("PUT", "/movie/1", strings.NewReader(reqBody)) // Используем метод PUT
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")             // Устанавливаем роль в контексте
+	req := httptest.NewRequest("PUT", "/movie/1", strings.NewReader(reqBody))
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.movieHandle(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusCreated, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "movie updated successfully"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -382,33 +346,27 @@ func TestHandler_updateMovie_Unsuccessful(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
-	mockMovieService.EXPECT().UpdateMovie(gomock.Any(), gomock.Any()).Return(errors.New("Failed to update movie")) // Ожидаем вызов UpdateMovie с любыми аргументами и возвращаем ошибку
+	mockMovieService.EXPECT().UpdateMovie(gomock.Any(), gomock.Any()).Return(errors.New("Failed to update movie"))
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Updated Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
-	req := httptest.NewRequest("PUT", "/movie/1", strings.NewReader(reqBody)) // Используем метод PUT
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")             // Устанавливаем роль в контексте
+	req := httptest.NewRequest("PUT", "/movie/1", strings.NewReader(reqBody))
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.updateMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "{\"message\":\"Failed to update movie\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -419,30 +377,24 @@ func TestHandler_getMovie_Unsuccessful(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
-	mockMovieService.EXPECT().GetMovieByID(1).Return(model.MovieWithActors{}, errors.New("Failed to get movie")) // Ожидаем вызов GetMovieByID с аргументом 1 и возвращаем ошибку
+	mockMovieService.EXPECT().GetMovieByID(1).Return(model.MovieWithActors{}, errors.New("Failed to get movie"))
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("GET", "/movie/1", nil) // Используем метод GET
+	req := httptest.NewRequest("GET", "/movie/1", nil)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.getMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "{\"message\":\"Failed to get movie\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -453,40 +405,34 @@ func TestHandler_getMovie_Successful(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 	expectedMovie := &model.MovieWithActors{
 		ID:     1,
 		Title:  "Test Movie",
 		Actors: []model.Actor{},
 	}
-	mockMovieService.EXPECT().GetMovieByID(1).Return(*expectedMovie, nil) // Ожидаем вызов GetMovieByID с аргументом 1 и возвращаем ожидаемый фильм
+	mockMovieService.EXPECT().GetMovieByID(1).Return(*expectedMovie, nil)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("GET", "/movie/1", nil) // Используем метод GET
+	req := httptest.NewRequest("GET", "/movie/1", nil)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.movieHandle(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse, err := json.Marshal(expectedMovie)
 	if err != nil {
 		t.Errorf("Error marshaling expected movie: %v", err)
 	}
-	expectedResponseString := string(expectedResponse) + "\n" // Добавляем новую строку в конце, чтобы совпадать с форматом тела ответа
+	expectedResponseString := string(expectedResponse) + "\n"
 	if w.Body.String() != expectedResponseString {
 		t.Errorf("Expected response body %q, got %q", expectedResponseString, w.Body.String())
 	}
@@ -496,7 +442,6 @@ func TestHandler_searchMovie(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 	expectedMovies := []model.MovieWithActors{
 		{
@@ -518,28 +463,23 @@ func TestHandler_searchMovie(t *testing.T) {
 			},
 		},
 	}
-	mockMovieService.EXPECT().GetMoviesByTitle("Movie").Return(expectedMovies, nil) // Ожидаем вызов GetMoviesByTitle с аргументом "Movie" и возвращаем ожидаемые фильмы
+	mockMovieService.EXPECT().GetMoviesByTitle("Movie").Return(expectedMovies, nil)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("GET", "/movie?title=Movie", nil) // Используем метод GET с параметром title
+	req := httptest.NewRequest("GET", "/movie?title=Movie", nil)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.searchMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse, err := json.Marshal(expectedMovies)
 	if err != nil {
 		t.Errorf("Error marshaling expected movie: %v", err)
@@ -561,7 +501,6 @@ func TestHandler_searchMovie_EmptyParams(t *testing.T) {
 		},
 	}
 
-	// Проверка случая, когда оба параметра пустые строки
 	req := httptest.NewRequest("GET", "/movie", nil)
 	w := httptest.NewRecorder()
 
@@ -584,7 +523,6 @@ func TestHandler_searchMovie_InvalidRequest(t *testing.T) {
 		},
 	}
 
-	// Проверка случая, когда оба параметра указаны
 	req := httptest.NewRequest("GET", "/movie?title=Movie&actor=Actor", nil)
 	w := httptest.NewRecorder()
 
@@ -599,31 +537,25 @@ func TestHandler_updateMovie_MethodNotAllowed(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
-	req := httptest.NewRequest("POST", "/api/movie/1", nil)       // Используем метод POST, который не поддерживается для обновления фильма
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin") // Устанавливаем роль в контексте
+	req := httptest.NewRequest("POST", "/api/movie/1", nil)
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.updateMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "{\"message\":\"Method not allowed\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())
@@ -634,32 +566,26 @@ func TestHandler_updateMovie_InvalidMovieID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем мок сервиса Movie
 	mockMovieService := mock_service.NewMockMovie(ctrl)
 
-	// Создаем Handler
 	handler := &Handler{
 		services: &service.Service{
 			Movie: mockMovieService,
 		},
 	}
 
-	// Создаем тестируемый хендлер
 	reqBody := `{"title":"Updated Movie", "actors":[{"name":"Actor 1", "gender":"female", "birth_date":"2003-9-2"}]}`
-	req := httptest.NewRequest("PUT", "/movie/invalid_id", strings.NewReader(reqBody)) // Передаем некорректный идентификатор фильма
-	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")                      // Устанавливаем роль в контексте
+	req := httptest.NewRequest("PUT", "/movie/invalid_id", strings.NewReader(reqBody))
+	ctx := context.WithValue(req.Context(), userRoleCtx, "admin")
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	// Вызываем тестируемый хендлер
 	handler.updateMovie(w, req)
 
-	// Проверяем код ответа
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
 	}
 
-	// Проверяем тело ответа
 	expectedResponse := "{\"message\":\"Invalid movie ID\"}"
 	if w.Body.String() != expectedResponse {
 		t.Errorf("Expected response body %q, got %q", expectedResponse, w.Body.String())

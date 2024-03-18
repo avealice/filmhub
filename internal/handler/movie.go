@@ -209,7 +209,6 @@ func (h *Handler) searchMovie(w http.ResponseWriter, r *http.Request) {
 
 	userID, _ := getUserID(r)
 
-	// Логируем успешный поиск фильмов
 	logEntry := logrus.WithFields(logrus.Fields{
 		"user_id":          userID,
 		"title":            title,

@@ -7,11 +7,12 @@ TEST_PATH := ./internal/handler
 build:
 	docker-compose build $(APP_NAME)
 
-run: build
+run: 
 	docker-compose up $(APP_NAME)
 
 test:
 	go test -cover -v $(TEST_PATH)
 
 clean:
-	rm -f $(APP_NAME)
+    rm -f $(APP_NAME)
+    docker-compose down

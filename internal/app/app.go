@@ -77,7 +77,7 @@ func (a *App) Run() {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
 
-	logrus.Print("Filmoteca Shutting Down")
+	logrus.Print("Filmhub Shutting Down")
 
 	if err := db.Close(); err != nil {
 		logrus.Errorf("error occured on db connection close: %s", err.Error())
@@ -93,7 +93,7 @@ func (a *App) run(port string, handler http.Handler) error {
 		WriteTimeout:   10 * time.Second,
 	}
 
-	logrus.Print("Filmoteca Started")
+	logrus.Print("Filmhub Started")
 
 	if err := a.httpServer.ListenAndServe(); err != nil {
 		return err
