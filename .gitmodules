@@ -1,0 +1,3 @@
+[submodule "todo-app"]
+	path = todo-app
+	url = git@github.com:avealice/todo-app.git
